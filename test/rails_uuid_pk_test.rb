@@ -74,9 +74,10 @@ class RailsUuidPkTest < ActiveSupport::TestCase
   end
 
   # Database Compatibility Tests - SQLite
-  test "schema format is set to sql for SQLite" do
+  test "schema format remains default for SQLite" do
     if ActiveRecord::Base.connection.adapter_name == "SQLite"
-      assert_equal :sql, Rails.application.config.active_record.schema_format
+      # Should use default :ruby format now that UUID schema dumping is supported
+      assert_equal :ruby, Rails.application.config.active_record.schema_format
     end
   end
 

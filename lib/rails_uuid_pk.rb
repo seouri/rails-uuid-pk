@@ -1,5 +1,8 @@
 require "rails_uuid_pk/version"
 require "rails_uuid_pk/concern"
+require "rails_uuid_pk/type"
+require "rails_uuid_pk/schema_dumper"
+require "rails_uuid_pk/sqlite3_adapter_extension"
 require "rails_uuid_pk/railtie"
 
 module RailsUuidPk
