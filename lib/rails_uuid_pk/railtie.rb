@@ -12,8 +12,8 @@ module RailsUuidPk
           # Register the UUID type with ActiveRecord
           ActiveRecord::Type.register(:uuid, RailsUuidPk::Type::Uuid, adapter: :sqlite3)
 
-          # Map varchar(36) SQL type to our custom UUID type (since that's how UUID columns are stored in SQLite)
-          ActiveRecord::Base.connection.send(:type_map).register_type(/varchar\(36\)/i) do |sql_type|
+          # Map varchar SQL type to our custom UUID type (since that's how UUID columns are stored in SQLite)
+          ActiveRecord::Base.connection.send(:type_map).register_type(/varchar/i) do |sql_type|
             RailsUuidPk::Type::Uuid.new
           end
 
@@ -30,11 +30,7 @@ module RailsUuidPk
       ActiveRecord::ConnectionAdapters::SQLite3Adapter.prepend(RailsUuidPk::Sqlite3AdapterExtension)
     end
 
-    initializer "rails-uuid-pk.schema_dumper", after: "active_record.initialize_database" do
-      require "active_record/connection_adapters/sqlite3_adapter"
-      require "rails_uuid_pk/schema_dumper"
-      ActiveRecord::ConnectionAdapters::SQLite3::SchemaDumper.prepend(RailsUuidPk::SchemaDumper)
-    end
+
 
     initializer "rails-uuid-pk.schema_format" do |app|
       # Ensure schema_format is set to :ruby for SQLite (default in Rails)
