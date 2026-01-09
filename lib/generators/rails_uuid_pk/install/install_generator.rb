@@ -13,18 +13,15 @@ module RailsUuidPk
       def show_next_steps
         say "\nrails-uuid-pk was successfully installed!", :green
 
-        say "\n⚠️  IMPORTANT - Action Text & Active Storage compatibility", :red
+        say "\n✅ Action Text & Active Storage compatibility", :green
         say "─────────────────────────────────────────────────────────────"
-        say "When you run any of these commands:"
+        say "Migration helpers now automatically handle foreign key types!"
+        say "When you run:"
         say "  rails action_text:install"
         say "  rails active_storage:install"
         say ""
-        say "You **MUST** manually edit the generated migration and add:"
-        say ""
-        say "  t.references :record, null: false, polymorphic: true, index: false, type: :uuid"
-        say ""
-        say "Without this change you'll get type mismatch errors (bigint vs uuid)."
-        say "This is a Rails limitation - see Rails guides for details."
+        say "The generated migrations will automatically use the correct UUID types"
+        say "for foreign keys. No manual editing required!"
         say "─────────────────────────────────────────────────────────────\n"
 
         say "\nRecommended next steps:", :yellow

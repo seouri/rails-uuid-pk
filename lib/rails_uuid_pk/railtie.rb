@@ -42,5 +42,15 @@ module RailsUuidPk
         ActiveRecord::Base.include RailsUuidPk::HasUuidv7PrimaryKey
       end
     end
+
+    initializer "rails-uuid-pk.migration_helpers" do
+      ActiveSupport.on_load(:active_record) do
+        require "rails_uuid_pk/migration_helpers"
+
+        # Include migration helpers for all database adapters
+        ActiveRecord::ConnectionAdapters::TableDefinition.prepend(RailsUuidPk::MigrationHelpers::References)
+        ActiveRecord::ConnectionAdapters::Table.prepend(RailsUuidPk::MigrationHelpers::References)
+      end
+    end
   end
 end

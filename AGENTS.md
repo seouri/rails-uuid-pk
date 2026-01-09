@@ -8,9 +8,11 @@ This guide helps LLM coding agents understand and contribute to the rails-uuid-p
 
 ### Key Features
 - Automatic UUIDv7 primary key generation using Ruby 3.3+ `SecureRandom.uuid_v7`
+- Smart migration helpers that automatically detect and set UUID foreign key types
 - Rails generator integration for easy setup
 - Railtie-based automatic inclusion in all ActiveRecord models
 - Database-agnostic design (PostgreSQL + SQLite)
+- Truly zero-configuration after installation
 - Comprehensive test suite
 
 ## Development Environment
@@ -35,6 +37,7 @@ rails-uuid-pk/
 │   ├── rails_uuid_pk.rb          # Main module
 │   ├── rails_uuid_pk/            # Core functionality
 │   │   ├── concern.rb            # UUIDv7 generation concern
+│   │   ├── migration_helpers.rb  # Smart foreign key type detection
 │   │   ├── railtie.rb            # Rails integration
 │   │   └── version.rb            # Version info
 │   └── generators/               # Rails generators
@@ -61,15 +64,23 @@ rails-uuid-pk/
    - `before_create` callback for UUID generation
    - Uses `SecureRandom.uuid_v7` for reliable UUIDv7 creation
 
-2. **Railtie (`lib/rails_uuid_pk/railtie.rb`)**:
+2. **MigrationHelpers (`lib/rails_uuid_pk/migration_helpers.rb`)**:
+   - `References` module that extends ActiveRecord migration methods
+   - Automatically detects UUID primary keys in referenced tables
+   - Sets appropriate foreign key types (`:uuid` vs `:integer`)
+   - Handles both regular and polymorphic associations
+   - Respects explicitly set user types
+
+3. **Railtie (`lib/rails_uuid_pk/railtie.rb`)**:
    - Automatic inclusion in `ActiveRecord::Base`
    - Generator configuration (`primary_key_type: :uuid`)
    - Database-specific configurations (SQLite schema format, type mappings)
+   - Includes migration helpers in ActiveRecord migration classes
 
-3. **Generator (`lib/generators/rails_uuid_pk/install/`)**:
+4. **Generator (`lib/generators/rails_uuid_pk/install/`)**:
    - Installation generator
    - Creates concern file
-   - Shows compatibility warnings
+   - Shows compatibility information
 
 ### Key Design Decisions
 
@@ -152,6 +163,17 @@ cd test/dummy && rails test
 1. Modify templates in `lib/generators/rails_uuid_pk/install/templates/`
 2. Update generator logic in `install_generator.rb`
 3. Test generator output
+
+#### Migration Helpers
+1. Modify `lib/rails_uuid_pk/migration_helpers.rb` for foreign key type detection logic
+2. Add comprehensive tests in `test/rails_uuid_pk_test.rb` for all scenarios:
+   - References to existing UUID tables
+   - References to non-UUID tables
+   - Polymorphic associations
+   - Explicit type overrides
+   - Non-existent table handling
+3. Update railtie in `lib/rails_uuid_pk/railtie.rb` if inclusion logic changes
+4. Test with both SQLite and PostgreSQL databases
 
 ## Troubleshooting
 

@@ -13,6 +13,8 @@ Works great with **PostgreSQL 18+** and **SQLite 3.51+** — zero extra extensio
 - Automatically sets `:uuid` as default primary key type
 - Adds reliable `before_create` callback for UUIDv7 generation
 - Works perfectly on **both PostgreSQL 18+** and **SQLite** (and older PostgreSQL versions too)
+- **PostgreSQL**: Uses native `UUID` column types with full database support
+- **SQLite**: Uses `VARCHAR(36)` with custom ActiveRecord type handling
 - Zero database extensions needed
 - Minimal and maintainable — no monkey-patching hell
 
@@ -21,7 +23,7 @@ Works great with **PostgreSQL 18+** and **SQLite 3.51+** — zero extra extensio
 Add to your `Gemfile`:
 
 ```ruby
-gem "rails-uuid-pk", "~> 0.1"
+gem "rails-uuid-pk", "~> 0.3"
 ```
 
 Then run:
@@ -57,8 +59,6 @@ User.create!(name: "Alice")  # ← id is automatically a proper UUIDv7
 
 ### Action Text & Active Storage
 
-**These Rails engines do NOT automatically respect the `primary_key_type: :uuid` setting** when generating their install migrations.
-
 When you run:
 
 ```bash
@@ -66,36 +66,24 @@ rails action_text:install
 rails active_storage:install
 ```
 
-You **MUST** manually edit the generated migration and change:
+The generated migrations will **automatically use the correct foreign key types** when referencing tables with UUID primary keys. No manual editing required!
+
+This works because rails-uuid-pk includes smart migration helpers that detect the primary key type of referenced tables and automatically set `type: :uuid` for foreign keys.
+
+### Polymorphic associations
+
+**Polymorphic associations** (like Action Text's `record` references) will automatically use the correct foreign key type based on the referenced table's primary key. If the parent model uses UUID primary keys, the foreign key will be UUID type.
+
+For **custom polymorphic associations**, the migration helpers will also automatically detect and set the correct type:
 
 ```ruby
-t.references :record, null: false, polymorphic: true, index: false
-# to
-t.references :record, null: false, polymorphic: true, index: false, type: :uuid
+# This will automatically use type: :uuid if the parent models have UUID primary keys
+create_table :comments do |t|
+  t.references :commentable, polymorphic: true
+end
 ```
 
-Same applies to `active_storage_attachments.record_id`.
-
-**Without this change** you will get:
-
-- `PG::DatatypeMismatch` errors
-- Duplicate key violations on uniqueness indexes
-- Association failures
-
-This is a **long-standing Rails limitation** (still present in Rails 8+).  
-The gem shows a big warning during installation — but double-check every time you install these engines.
-
-### Other polymorphic associations
-
-Any **custom polymorphic** association you create manually should also explicitly use `type: :uuid` if the parent models use UUID primary keys.
-
-```ruby
-# Good
-has_many :comments, as: :commentable, foreign_key: { type: :uuid }
-
-# Risky (may cause type mismatch)
-has_many :comments, as: :commentable
-```
+No manual `type: :uuid` specification needed!
 
 ## Features / Trade-offs
 
@@ -105,7 +93,7 @@ has_many :comments, as: :commentable
 | PostgreSQL 18+ native `uuidv7()`     | Not used        | Fallback approach — more universal, no extensions needed             |
 | SQLite support                       | Full            | No native function → app-side generation works great                  |
 | Index locality / performance         | Very good       | UUIDv7 is monotonic → almost as good as sequential IDs                |
-| Zero config after install            | Yes (mostly)    | Except Action Text / Active Storage migrations                        |
+| Zero config after install            | Yes             | Migration helpers automatically handle foreign key types             |
 | Works with Rails 7.1 – 8+            | Yes             | Tested conceptually up to Rails 8.1+                                  |
 
 ## Why not use native PostgreSQL `uuidv7()`?
