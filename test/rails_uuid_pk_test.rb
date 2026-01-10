@@ -1,7 +1,6 @@
 require "test_helper"
 require "rails/generators"
 require "rails/generators/rails/model/model_generator"
-require "generators/rails_uuid_pk/install/install_generator"
 
 class RailsUuidPkTest < ActiveSupport::TestCase
   def setup
@@ -432,30 +431,7 @@ class RailsUuidPkTest < ActiveSupport::TestCase
     User.where("name LIKE ?", "Memory Test User%").delete_all
   end
 
-  # Generator Integration Tests
-  test "install generator copies concern file correctly" do
-    # Use a temporary directory to avoid conflicts with existing files
-    temp_dir = Rails.root.join("tmp", "test_generator")
-    FileUtils.mkdir_p(temp_dir)
 
-    begin
-      # Test that the install generator copies the file to the right location
-      generator = RailsUuidPk::Generators::InstallGenerator.new
-      generator.destination_root = temp_dir
-      generator.add_concern_file
-
-      concern_path = temp_dir.join("app/models/concerns/has_uuidv7_primary_key.rb")
-      assert File.exist?(concern_path), "Concern file should be copied by install generator"
-
-      # Verify the content matches the template
-      expected_content = File.read(File.join(generator.class.source_root, "has_uuidv7_primary_key.rb"))
-      actual_content = File.read(concern_path)
-      assert_equal expected_content, actual_content, "Concern file content should match template"
-    ensure
-      # Clean up
-      FileUtils.rm_rf(temp_dir) if Dir.exist?(temp_dir)
-    end
-  end
 
   test "create_table with id option uses uuid primary key" do
     # Test that create_table with id: :uuid creates uuid primary key
@@ -484,25 +460,7 @@ class RailsUuidPkTest < ActiveSupport::TestCase
     TestUuidMigration.migrate(:down)
   end
 
-  test "install generator shows appropriate warnings and instructions" do
-    generator = RailsUuidPk::Generators::InstallGenerator.new
 
-    # Capture output
-    output = StringIO.new
-    $stdout = output
-
-    begin
-      generator.show_next_steps
-
-      output_content = output.string
-      assert_match(/rails-uuid-pk was successfully installed/, output_content)
-      assert_match(/Action Text & Active Storage compatibility/, output_content)
-      assert_match(/Migration helpers now automatically handle foreign key types/, output_content)
-      assert_match(/rails g model User name:string/, output_content)
-    ensure
-      $stdout = STDOUT
-    end
-  end
 
   # Migration Helpers Tests
   test "references automatically sets type: :uuid when referencing table with UUID primary key" do

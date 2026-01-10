@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
+## [0.5.0] - 2026-01-10
+
+### Changed
+- **Made gem truly zero-configuration**: Removed install generator and concern file
+- Simplified installation to just `bundle install` - no generator command needed
+- Removed `app/models/concerns/has_uuidv7_primary_key.rb` template and explicit inclusion option
+- Updated documentation to reflect simplified zero-config approach
+- All functionality now works automatically through Railtie inclusion
+
+### Removed
+- Install generator (`rails g rails_uuid_pk:install`)
+- Optional concern file for explicit inclusion
+- Generator template and associated test cases
+- Manual installation steps and configuration options
+
+### Technical Details
+- Eliminated generator complexity while maintaining all core functionality
+- Streamlined user experience - just add gem to Gemfile and it works
+- Removed optional explicit concern inclusion in favor of automatic Railtie-based inclusion
+- Updated AGENTS.md and README.md to reflect simplified architecture
+
 ## [0.4.0] - 2026-01-10
 
 ### Added

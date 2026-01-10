@@ -9,10 +9,9 @@ This guide helps LLM coding agents understand and contribute to the rails-uuid-p
 ### Key Features
 - Automatic UUIDv7 primary key generation using Ruby 3.3+ `SecureRandom.uuid_v7`
 - Smart migration helpers that automatically detect and set UUID foreign key types
-- Rails generator integration for easy setup
 - Railtie-based automatic inclusion in all ActiveRecord models
 - Database-agnostic design (PostgreSQL, MySQL, and SQLite)
-- Truly zero-configuration after installation
+- Truly zero-configuration - just add to Gemfile
 - Comprehensive test suite
 
 ## Development Environment
@@ -41,9 +40,7 @@ rails-uuid-pk/
 │   │   ├── migration_helpers.rb  # Smart foreign key type detection
 │   │   ├── railtie.rb            # Rails integration
 │   │   └── version.rb            # Version info
-│   └── generators/               # Rails generators
-│       └── rails_uuid_pk/
-│           └── install/          # Installation generator
+│   └── generators/               # Rails generators (removed - gem is now zero-config)
 ├── test/                         # Test suite
 │   ├── dummy/                    # Rails dummy app for testing
 │   ├── rails_uuid_pk_test.rb     # Main test file
@@ -77,11 +74,6 @@ rails-uuid-pk/
    - Generator configuration (`primary_key_type: :uuid`)
    - Database-specific configurations (SQLite schema format, type mappings)
    - Includes migration helpers in ActiveRecord migration classes
-
-4. **Generator (`lib/generators/rails_uuid_pk/install/`)**:
-   - Installation generator
-   - Creates concern file
-   - Shows compatibility information
 
 ### Key Design Decisions
 

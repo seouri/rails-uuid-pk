@@ -24,21 +24,16 @@ Works great with **PostgreSQL 18+**, **MySQL 8.0+**, and **SQLite 3.51+** — ze
 Add to your `Gemfile`:
 
 ```ruby
-gem "rails-uuid-pk", "~> 0.3"
+gem "rails-uuid-pk", "~> 0.5"
 ```
 
 Then run:
 
 ```bash
 bundle install
-rails generate rails_uuid_pk:install
 ```
 
-The generator will:
-
-- Set `primary_key_type: :uuid` in your generators config
-- Create `app/models/concerns/has_uuidv7_primary_key.rb` (optional explicit include)
-- Show important compatibility notes
+That's it! The gem automatically enables UUIDv7 primary keys for all your models.
 
 ## Usage
 
