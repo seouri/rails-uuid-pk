@@ -9,6 +9,9 @@ if ENV['DB'].nil?
 
   puts "Running tests with PostgreSQL..."
   system({"RAILS_ENV" => "test_postgresql", "DB" => "postgres"}, "ruby", __FILE__)
+
+  puts "Running tests with MySQL..."
+  system({"RAILS_ENV" => "test_mysql", "DB" => "mysql"}, "ruby", __FILE__)
 else
   require "rails/plugin/test"
 

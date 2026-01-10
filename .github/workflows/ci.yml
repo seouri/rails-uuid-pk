@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        db: [sqlite3, postgresql]
+        db: [sqlite3, postgresql, mysql]
     services:
       postgres:
         image: postgres:15
@@ -49,9 +49,18 @@ jobs:
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ""
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_DATABASE: rails_uuid_pk_test
+        ports:
+          - 3306:3306
+        options: --health-cmd "mysqladmin ping -h localhost" --health-interval 10s --health-timeout 5s --health-retries 5
     env:
       DB_HOST: localhost
-      RAILS_ENV: ${{ matrix.db == 'postgresql' && 'test_postgresql' || 'test' }}
+      RAILS_ENV: ${{ matrix.db == 'postgresql' && 'test_postgresql' || matrix.db == 'mysql' && 'test_mysql' || 'test' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

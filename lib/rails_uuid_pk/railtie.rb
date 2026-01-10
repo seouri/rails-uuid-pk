@@ -21,6 +21,19 @@ module RailsUuidPk
           ActiveRecord::Base.connection.send(:type_map).register_type "uuid" do |sql_type|
             RailsUuidPk::Type::Uuid.new
           end
+        elsif ActiveRecord::Base.connection.adapter_name == "MySQL"
+          # Register the UUID type with ActiveRecord for MySQL
+          ActiveRecord::Type.register(:uuid, RailsUuidPk::Type::Uuid, adapter: :mysql2)
+
+          # Map varchar SQL type to our custom UUID type (since that's how UUID columns are stored in MySQL)
+          ActiveRecord::Base.connection.send(:type_map).register_type(/varchar/i) do |sql_type|
+            RailsUuidPk::Type::Uuid.new
+          end
+
+          # Also map "uuid" SQL type to our custom UUID type for direct lookups
+          ActiveRecord::Base.connection.send(:type_map).register_type "uuid" do |sql_type|
+            RailsUuidPk::Type::Uuid.new
+          end
         end
       end
     end
@@ -28,6 +41,15 @@ module RailsUuidPk
     initializer "rails-uuid-pk.native_types" do
       require "active_record/connection_adapters/sqlite3_adapter"
       ActiveRecord::ConnectionAdapters::SQLite3Adapter.prepend(RailsUuidPk::Sqlite3AdapterExtension)
+    end
+
+    initializer "rails-uuid-pk.mysql_native_types" do
+      begin
+        require "active_record/connection_adapters/mysql2_adapter"
+        ActiveRecord::ConnectionAdapters::Mysql2Adapter.prepend(RailsUuidPk::Mysql2AdapterExtension)
+      rescue LoadError
+        # MySQL adapter not available, skip MySQL-specific initialization
+      end
     end
 
 

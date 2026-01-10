@@ -1,7 +1,7 @@
 # rails-uuid-pk
 
 **Dead-simple UUIDv7 primary keys for modern Rails apps**  
-Works great with **PostgreSQL 18+** and **SQLite 3.51+** — zero extra extensions required.
+Works great with **PostgreSQL 18+**, **MySQL 8.0+**, and **SQLite 3.51+** — zero extra extensions required.
 
 [![Gem Version](https://img.shields.io/gem/v/rails-uuid-pk.svg?style=flat-square)](https://rubygems.org/gems/rails-uuid-pk)
 [![Ruby](https://img.shields.io/badge/ruby-≥3.3-red.svg?style=flat-square)](https://www.ruby-lang.org)
@@ -12,8 +12,9 @@ Works great with **PostgreSQL 18+** and **SQLite 3.51+** — zero extra extensio
 - Uses **native** `SecureRandom.uuid_v7` (Ruby 3.3+)
 - Automatically sets `:uuid` as default primary key type
 - Adds reliable `before_create` callback for UUIDv7 generation
-- Works perfectly on **both PostgreSQL 18+** and **SQLite** (and older PostgreSQL versions too)
+- Works perfectly on **PostgreSQL 18+**, **MySQL 8.0+**, and **SQLite** (and older versions too)
 - **PostgreSQL**: Uses native `UUID` column types with full database support
+- **MySQL**: Uses `VARCHAR(36)` with custom ActiveRecord type handling
 - **SQLite**: Uses `VARCHAR(36)` with custom ActiveRecord type handling
 - Zero database extensions needed
 - Minimal and maintainable — no monkey-patching hell
@@ -91,7 +92,9 @@ No manual `type: :uuid` specification needed!
 |--------------------------------------|-----------------|-----------------------------------------------------------------------|
 | UUIDv7 generation                    | Automatic       | Uses `SecureRandom.uuid_v7` (very good randomness + monotonicity)     |
 | PostgreSQL 18+ native `uuidv7()`     | Not used        | Fallback approach — more universal, no extensions needed             |
-| SQLite support                       | Full            | No native function → app-side generation works great                  |
+| PostgreSQL support                   | Full            | Native `UUID` column types with full database support                |
+| MySQL 8.0+ support                   | Full            | Uses `VARCHAR(36)` with custom ActiveRecord type handling            |
+| SQLite support                       | Full            | Uses `VARCHAR(36)` with custom ActiveRecord type handling            |
 | Index locality / performance         | Very good       | UUIDv7 is monotonic → almost as good as sequential IDs                |
 | Zero config after install            | Yes             | Migration helpers automatically handle foreign key types             |
 | Works with Rails 7.1 – 8+            | Yes             | Tested conceptually up to Rails 8.1+                                  |
@@ -119,15 +122,16 @@ This project includes a devcontainer configuration for VS Code. To get started:
 
 ### Running Tests
 
-The project includes a comprehensive test suite that runs against both SQLite and PostgreSQL.
+The project includes a comprehensive test suite that runs against SQLite, PostgreSQL, and MySQL.
 
 ```bash
-# Run all tests (SQLite + PostgreSQL)
+# Run all tests (SQLite + PostgreSQL + MySQL)
 ./bin/test
 
 # Run tests for specific database
 DB=sqlite ./bin/test      # SQLite only
 DB=postgres ./bin/test    # PostgreSQL only
+DB=mysql ./bin/test       # MySQL only
 ```
 
 ### Code Quality
@@ -152,9 +156,10 @@ gem install rails-uuid-pk-0.1.0.gem
 
 ### Database Setup
 
-For PostgreSQL testing, ensure PostgreSQL is running and accessible. The test suite uses these environment variables:
+For database testing, ensure the respective databases are running and accessible. The test suite uses these environment variables:
 - `DB_HOST` (defaults to localhost)
 - `RAILS_ENV=test_postgresql` for PostgreSQL tests
+- `RAILS_ENV=test_mysql` for MySQL tests
 
 ## Contributing
 

@@ -4,14 +4,14 @@ This guide helps LLM coding agents understand and contribute to the rails-uuid-p
 
 ## Project Overview
 
-**rails-uuid-pk** is a Ruby gem that automatically uses UUIDv7 for all primary keys in Ruby on Rails applications. It provides seamless integration with Rails generators, automatic UUIDv7 generation, and support for both PostgreSQL and SQLite databases.
+**rails-uuid-pk** is a Ruby gem that automatically uses UUIDv7 for all primary keys in Ruby on Rails applications. It provides seamless integration with Rails generators, automatic UUIDv7 generation, and support for PostgreSQL, MySQL, and SQLite databases.
 
 ### Key Features
 - Automatic UUIDv7 primary key generation using Ruby 3.3+ `SecureRandom.uuid_v7`
 - Smart migration helpers that automatically detect and set UUID foreign key types
 - Rails generator integration for easy setup
 - Railtie-based automatic inclusion in all ActiveRecord models
-- Database-agnostic design (PostgreSQL + SQLite)
+- Database-agnostic design (PostgreSQL, MySQL, and SQLite)
 - Truly zero-configuration after installation
 - Comprehensive test suite
 
@@ -21,6 +21,7 @@ This guide helps LLM coding agents understand and contribute to the rails-uuid-p
 - Ruby 3.3.0+
 - Rails 8.0+
 - PostgreSQL (optional, for testing)
+- MySQL 8.0+ (optional, for testing)
 - SQLite3 (included with Ruby)
 
 ### Quick Start
@@ -85,7 +86,7 @@ rails-uuid-pk/
 ### Key Design Decisions
 
 - **Railtie-based inclusion**: Automatic integration without requiring model changes
-- **Database agnostic**: Works with both PostgreSQL and SQLite
+- **Database agnostic**: Works with PostgreSQL, MySQL, and SQLite
 - **Fallback approach**: App-side generation instead of native DB functions for compatibility
 - **Minimal API**: Zero-configuration after installation
 
@@ -94,17 +95,18 @@ rails-uuid-pk/
 ### Test Organization
 - **Unit tests**: Core functionality in `test/rails_uuid_pk_test.rb`
 - **Integration tests**: Full Rails app testing via dummy app
-- **Database coverage**: Tests run against both SQLite and PostgreSQL
+- **Database coverage**: Tests run against SQLite, PostgreSQL, and MySQL
 - **CI coverage**: GitHub Actions runs all tests on multiple Ruby versions
 
 ### Running Tests
 ```bash
-# All tests (SQLite + PostgreSQL)
+# All tests (SQLite + PostgreSQL + MySQL)
 ./bin/test
 
 # Specific database
 DB=sqlite ./bin/test
 DB=postgres ./bin/test
+DB=mysql ./bin/test
 
 # Rails test suite (from test/dummy/)
 cd test/dummy && rails test
@@ -113,6 +115,7 @@ cd test/dummy && rails test
 ### Test Database Setup
 - SQLite: Automatic, no setup required
 - PostgreSQL: Requires running PostgreSQL instance with test database
+- MySQL: Requires running MySQL 8.0+ instance with test database
 
 ## Coding Conventions
 

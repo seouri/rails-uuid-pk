@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
+## [0.4.0] - 2026-01-10
+
+### Added
+- **MySQL 8.0+ support**: Full MySQL compatibility with VARCHAR(36) UUID storage
+- MySQL2 adapter extension for native database type mappings
+- MySQL-specific type handling and schema dumping support
+- Comprehensive MySQL test suite with performance and edge case testing
+- CI pipeline support for MySQL 8.0 testing
+- Updated documentation to include MySQL setup and compatibility notes
+
+### Changed
+- Updated project description to reflect support for PostgreSQL, MySQL, and SQLite
+- Enhanced test runner to support all three database adapters
+- Updated development environment setup to include MySQL configuration
+- Expanded database coverage from 2 to 3 major Rails database adapters
+
+### Technical Details
+- Added `lib/rails_uuid_pk/mysql2_adapter_extension.rb` for MySQL adapter integration
+- Extended Railtie with MySQL-specific type mappings and adapter detection
+- Enhanced migration helpers compatibility with MySQL VARCHAR(36) column detection
+- Added MySQL performance testing (bulk operations, concurrent access, memory efficiency)
+- Implemented MySQL edge case testing (long table names, special characters)
+- Updated CI workflow with MySQL 8.0 service configuration
+
 ## [0.3.0] - 2026-01-09
 
 ### Added
