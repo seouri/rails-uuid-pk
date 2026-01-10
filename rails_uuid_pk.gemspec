@@ -6,8 +6,8 @@ Gem::Specification.new do |spec|
   spec.authors     = [ "Joon Lee" ]
   spec.email       = [ "seouri@gmail.com" ]
   spec.homepage    = "https://github.com/seouri/rails-uuid-pk"
-  spec.summary     = "Dead-simple UUIDv7 primary keys for Rails apps"
-  spec.description = "Automatically use UUIDv7 for all primary keys in Rails applications. Works with PostgreSQL and SQLite, zero configuration required."
+  spec.summary     = "Dead-simple UUID v7 primary keys for Rails apps"
+  spec.description = "Automatically use UUID v7 for all primary keys in Rails applications. Works with PostgreSQL, MySQL, and SQLite, zero configuration required."
   spec.license     = "MIT"
 
   spec.metadata["homepage_uri"] = spec.homepage
