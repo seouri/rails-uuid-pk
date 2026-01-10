@@ -55,31 +55,26 @@ User.create!(name: "Alice")  # ← id is automatically a proper UUIDv7
 
 ### Action Text & Active Storage
 
-When you run:
+When you install Action Text or Active Storage:
 
 ```bash
 rails action_text:install
 rails active_storage:install
 ```
 
-The generated migrations will **automatically use the correct foreign key types** when referencing tables with UUID primary keys. No manual editing required!
-
-This works because rails-uuid-pk includes smart migration helpers that detect the primary key type of referenced tables and automatically set `type: :uuid` for foreign keys.
+The generated migrations seamlessly integrate with UUID primary keys. Rails-uuid-pk's smart migration helpers automatically detect UUID primary keys in referenced tables and set the appropriate `type: :uuid` for foreign keys.
 
 ### Polymorphic associations
 
-**Polymorphic associations** (like Action Text's `record` references) will automatically use the correct foreign key type based on the referenced table's primary key. If the parent model uses UUID primary keys, the foreign key will be UUID type.
+Polymorphic associations work seamlessly with UUID primary keys. Whether you're using Action Text's `record` references or custom polymorphic associations, the migration helpers automatically detect the parent table's primary key type and set the correct foreign key type.
 
-For **custom polymorphic associations**, the migration helpers will also automatically detect and set the correct type:
+For example, this migration will automatically use `type: :uuid` when the parent models have UUID primary keys:
 
 ```ruby
-# This will automatically use type: :uuid if the parent models have UUID primary keys
 create_table :comments do |t|
   t.references :commentable, polymorphic: true
 end
 ```
-
-No manual `type: :uuid` specification needed!
 
 ## Features / Trade-offs
 
