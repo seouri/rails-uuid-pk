@@ -29,6 +29,48 @@ This guide helps LLM coding agents understand and contribute to the rails-uuid-p
 3. Use `./bin/test` to run the full test suite
 4. Use `./bin/rubocop` for code quality checks
 
+### Terminal-based AI Agents
+
+For AI coding agents that operate via command-line interfaces (such as Gemini CLI, Claude Code, or similar tools) and need to access the devcontainer environment from the host system:
+
+#### Devcontainer CLI Setup
+1. **Install Devcontainer CLI** on your host system:
+   ```bash
+   npm install -g @devcontainers/cli
+   ```
+
+2. **Access the devcontainer** for command execution:
+   ```bash
+   # Execute commands inside the running devcontainer
+   devcontainer exec --workspace-folder /workspaces/rails-uuid-pk bundle install
+
+   # Run tests
+   devcontainer exec --workspace-folder /workspaces/rails-uuid-pk ./bin/test
+
+   # Run code quality checks
+   devcontainer exec --workspace-folder /workspaces/rails-uuid-pk ./bin/rubocop
+
+   # Interactive shell access
+   devcontainer exec --workspace-folder /workspaces/rails-uuid-pk bash
+   ```
+
+#### Alternative Access Methods
+If Devcontainer CLI is not available, you can also access via Docker directly:
+
+```bash
+# Find the devcontainer
+docker ps | grep devcontainer
+
+# Execute commands in the container
+docker exec -it <container-id> ./bin/test
+```
+
+#### Best Practices for Terminal Agents
+- **Always specify workspace folder**: Use `--workspace-folder /workspaces/rails-uuid-pk` to ensure correct container context
+- **Sequential execution**: Run commands one at a time and wait for completion
+- **Environment awareness**: Be aware that file paths and environment variables may differ between host and container
+- **Use project scripts**: Prefer `./bin/test` and `./bin/rubocop` over direct `bundle exec` commands for consistency
+
 ## Project Structure
 
 ```
