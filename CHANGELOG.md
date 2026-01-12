@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
+## [0.6.0] - 2026-01-12
+
+### Added
+- **Support for `add_reference` and `add_belongs_to`**: Migration helpers now automatically handle foreign key types for these methods as well.
+- **Performance Caching**: Added primary key lookup caching during migrations to improve performance.
+
+### Changed
+- **Improved Migration Helpers**: Enhanced robustness of foreign key type detection by handling more default types (`:bigint`, `:integer`, `nil`).
+- **Refactored Railtie**: Unified UUID type registration for SQLite and MySQL, improving code maintainability.
+- **Better Initialization**: Improved timing of adapter extensions using `ActiveSupport.on_load`.
+
 ## [0.5.0] - 2026-01-10
 
 ### Changed

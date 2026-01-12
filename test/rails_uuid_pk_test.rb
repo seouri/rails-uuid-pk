@@ -706,6 +706,57 @@ class RailsUuidPkTest < ActiveSupport::TestCase
     CreateToTableParentTable.migrate(:down)
   end
 
+  test "add_reference automatically sets type: :uuid when referencing table with UUID primary key" do
+    # First, create a table with UUID primary key
+    create_uuid_table_migration = <<~MIGRATION
+      class CreateAddRefParentTable < ActiveRecord::Migration[#{Rails::VERSION::STRING.to_f}]
+        def change
+          create_table :add_ref_parents, id: :uuid do |t|
+            t.string :name
+          end
+        end
+      end
+    MIGRATION
+
+    eval(create_uuid_table_migration)
+    CreateAddRefParentTable.migrate(:up)
+
+    # Now create a table and THEN add a reference
+    create_table_migration = <<~MIGRATION
+      class CreateBaseTable < ActiveRecord::Migration[#{Rails::VERSION::STRING.to_f}]
+        def change
+          create_table :base_models do |t|
+            t.string :description
+          end
+        end
+      end
+    MIGRATION
+
+    eval(create_table_migration)
+    CreateBaseTable.migrate(:up)
+
+    add_ref_migration = <<~MIGRATION
+      class AddRefToTable < ActiveRecord::Migration[#{Rails::VERSION::STRING.to_f}]
+        def change
+          add_reference :base_models, :add_ref_parent, null: false
+        end
+      end
+    MIGRATION
+
+    eval(add_ref_migration)
+    AddRefToTable.migrate(:up)
+
+    # Check that the foreign key column was created with UUID type
+    columns = ActiveRecord::Base.connection.columns(:base_models)
+    fk_column = columns.find { |c| c.name == "add_ref_parent_id" }
+    assert_equal :uuid, fk_column.type, "add_reference should automatically be UUID type when referencing UUID primary key"
+
+    # Clean up
+    AddRefToTable.migrate(:down)
+    CreateBaseTable.migrate(:down)
+    CreateAddRefParentTable.migrate(:down)
+  end
+
   test "references does not set type when referenced table does not exist" do
     # Create a table that references a non-existent table
     create_reference_migration = <<~MIGRATION
