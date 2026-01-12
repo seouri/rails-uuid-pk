@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
+## [0.8.0] - 2026-01-12
+
+### Changed
+- **Refactored UUID Type Registration**: Moved from global type map registration to connection-specific registration for improved precision and database compatibility
+- **Enhanced Type Mapping Precision**: UUID types now only map to specific `varchar(36)` and `uuid` SQL types, preventing hijacking of standard string columns
+- **Improved Adapter Extensions**: Enhanced MySQL and SQLite adapter extensions with dedicated `register_uuid_types` methods and proper initialization hooks
+
+### Added
+- **String Column Protection Test**: Added test to ensure standard string columns are not incorrectly mapped to UUID type
+
+### Technical Details
+- Updated Railtie to use `ActiveSupport.on_load` hooks for cleaner adapter extension prepending
+- Implemented connection-aware UUID type registration during adapter initialization and connection setup
+- Enhanced migration helpers compatibility and type detection robustness
+
 ## [0.7.0] - 2026-01-12
 
 ### Added

@@ -16,17 +16,31 @@ module RailsUuidPk
     end
 
     initializer "rails-uuid-pk.native_types" do
+      ActiveSupport.on_load(:active_record_sqlite3adapter) do
+        prepend RailsUuidPk::Sqlite3AdapterExtension
+      end
+
+      ActiveSupport.on_load(:active_record_mysql2adapter) do
+        prepend RailsUuidPk::Mysql2AdapterExtension
+      end
+    end
+
+    config.after_initialize do
       ActiveSupport.on_load(:active_record) do
-        case ActiveRecord::Base.connection.adapter_name
-        when "SQLite"
-          require "active_record/connection_adapters/sqlite3_adapter"
-          ActiveRecord::ConnectionAdapters::SQLite3Adapter.prepend(RailsUuidPk::Sqlite3AdapterExtension)
-        when "MySQL"
-          begin
-            require "active_record/connection_adapters/mysql2_adapter"
-            ActiveRecord::ConnectionAdapters::Mysql2Adapter.prepend(RailsUuidPk::Mysql2AdapterExtension)
-          rescue LoadError
-            # MySQL adapter not available
+        if ActiveRecord::Base.connected?
+          ActiveRecord::Base.connection_handler.connection_pool_list.each do |pool|
+            connections = if pool.respond_to?(:connections)
+                            pool.connections
+            else
+                            # Fallback or older rails
+                            [ pool.connection ] rescue []
+            end
+
+            connections.each do |conn|
+              if conn.respond_to?(:register_uuid_types)
+                conn.register_uuid_types
+              end
+            end
           end
         end
       end
@@ -54,13 +68,6 @@ module RailsUuidPk
 
     def self.register_uuid_type(adapter)
       ActiveRecord::Type.register(:uuid, RailsUuidPk::Type::Uuid, adapter: adapter)
-
-      # Get the connection-specific type map
-      type_map = ActiveRecord::Base.connection.send(:type_map)
-      # Map varchar(36) or varchar SQL type to our custom UUID type
-      type_map.register_type(/varchar/i) { RailsUuidPk::Type::Uuid.new }
-      # Also map "uuid" SQL type for direct lookups
-      type_map.register_type("uuid") { RailsUuidPk::Type::Uuid.new }
     end
   end
 end
