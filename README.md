@@ -183,6 +183,8 @@ For database testing, ensure the respective databases are running and accessible
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/seouri/rails-uuid-pk.
 
+Please see our [Security Policy](SECURITY.md) for information about reporting security vulnerabilities.
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](MIT-LICENSE).
