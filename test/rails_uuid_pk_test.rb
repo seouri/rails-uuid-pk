@@ -64,6 +64,16 @@ class RailsUuidPkTest < ActiveSupport::TestCase
     assert User.column_for_attribute(:id).type == :uuid
   end
 
+  test "UUID type returns correct schema dump type based on Rails version" do
+    uuid_type = RailsUuidPk::Type::Uuid.new
+
+    # Test the rails_supports_uuid_in_schema? method
+    rails_version = Gem::Version.new(Rails::VERSION::STRING)
+    expected_type = rails_version >= Gem::Version.new("8.1.0") ? :uuid : :string
+
+    assert_equal expected_type, uuid_type.type
+  end
+
   test "railtie configures ActiveRecord generators to use uuid primary keys" do
     # The railtie configures ActiveRecord generator with primary_key_type: :uuid
     # Check that the generator configuration includes this setting

@@ -16,6 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
   - Side-channel attack vectors and mitigation strategies
   - Compliance considerations (GDPR, HIPAA, etc.)
   - Security testing recommendations and monitoring guidelines
+- **PERFORMANCE.md**: Comprehensive performance documentation in dedicated file
+  - UUID generation throughput metrics and cryptographic security details
+  - Database-specific performance characteristics (PostgreSQL, MySQL, SQLite)
+  - Index performance analysis comparing 36-byte UUIDs vs 4-byte integers
+  - Scaling recommendations for tables of different sizes (<1M, 1M-10M, >10M records)
+  - UUIDv7 vs UUIDv4 performance trade-offs with detailed comparison tables
+  - Index fragmentation and cache locality analysis
+  - Production monitoring and optimization guidelines
+- **README.md**: Streamlined with concise performance overview and link to PERFORMANCE.md
+
+### Changed
+- **Schema Dumper Compatibility**: Replaced fragile `caller` detection with Rails version-aware schema type handling
+  - Rails 8.1+: Uses `:uuid` type in schema dumps for native UUID support
+  - Rails 8.0.x: Uses `:string` type to avoid "Unknown type 'uuid'" errors
+  - Future-proof design that adapts to Rails version changes
+  - Added comprehensive test coverage for schema dumping behavior
+
+### Fixed
+- **Schema Dumping Fragility**: Eliminated dependency on Rails internal `caller` stack inspection
+- **Rails Version Compatibility**: Robust handling of UUID types across different Rails versions
 
 ### Security
 - Enhanced security posture with professional security documentation

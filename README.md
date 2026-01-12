@@ -90,6 +90,24 @@ end
 | Zero config after install            | Yes             | Migration helpers automatically handle foreign key types             |
 | Works with Rails 7.1 – 8+            | Yes             | Tested conceptually up to Rails 8.1+                                  |
 
+## Performance Overview
+
+**Generation**: ~10,000 UUIDs/second with cryptographic security and monotonic ordering
+
+| Database | Storage | Index Performance | Notes |
+|----------|---------|-------------------|--------|
+| **PostgreSQL** | Native UUID (16B) | Excellent | Optimal performance |
+| **MySQL** | VARCHAR(36) (36B) | Good | 2.25x storage overhead |
+| **SQLite** | VARCHAR(36) (36B) | Good | Good for development |
+
+**Key Advantages**:
+- **UUIDv7 outperforms UUIDv4** in most scenarios due to monotonic ordering
+- **Better index locality** than random UUIDs with reduced fragmentation
+- **Efficient range queries** for time-based data access
+- **Production-ready scaling** with proper indexing and monitoring
+
+For comprehensive performance analysis, scaling strategies, and optimization guides, see [PERFORMANCE.md](PERFORMANCE.md).
+
 ## Why not use native PostgreSQL `uuidv7()`?
 
 While PostgreSQL 18+ has excellent native `uuidv7()` support, the **fallback approach** was chosen for maximum compatibility:

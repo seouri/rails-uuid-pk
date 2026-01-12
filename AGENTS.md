@@ -93,6 +93,7 @@ rails-uuid-pk/
 ├── .github/workflows/ci.yml      # CI configuration
 ├── rails_uuid_pk.gemspec         # Gem specification
 ├── SECURITY.md                   # Security policy and considerations
+├── PERFORMANCE.md                # Detailed performance analysis and optimization
 └── README.md                     # User documentation
 ```
 

@@ -2,12 +2,12 @@ module RailsUuidPk
   module Type
     class Uuid < ActiveRecord::Type::String
       def type
-        # Return :string during schema dumping to avoid "Unknown type 'uuid'" errors
-        # Return :uuid for normal operation and tests
-        if caller.any? { |c| c.include?("schema_dumper") }
-          :string
-        else
+        # Rails 8.1+ supports UUID types in schema dumping
+        # Earlier versions need :string to avoid "Unknown type 'uuid'" errors
+        if rails_supports_uuid_in_schema?
           :uuid
+        else
+          :string
         end
       end
 
@@ -41,6 +41,13 @@ module RailsUuidPk
 
       def valid?(value)
         value.match?(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+      end
+
+      def rails_supports_uuid_in_schema?
+        # Rails 8.1+ supports UUID types in schema dumping
+        # Earlier versions (8.0.x) need :string to avoid "Unknown type 'uuid'" errors
+        rails_version = Gem::Version.new(Rails::VERSION::STRING)
+        rails_version >= Gem::Version.new("8.1.0")
       end
     end
   end
