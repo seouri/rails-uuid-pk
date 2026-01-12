@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
   - Side-channel attack vectors and mitigation strategies
   - Compliance considerations (GDPR, HIPAA, etc.)
   - Security testing recommendations and monitoring guidelines
+- **ARCHITECTURE.md**: Comprehensive architecture documentation
+  - Core design principles and architectural decisions
+  - App-level vs database-level UUID generation analysis
+  - Database compatibility rationale and trade-offs
+  - Migration performance implications and caching strategies
+  - Database replication and backup considerations
+  - ORM and query builder integration details
+  - Error handling and resilience patterns
+  - Future evolution and extensibility points
 - **PERFORMANCE.md**: Comprehensive performance documentation in dedicated file
   - UUID generation throughput metrics and cryptographic security details
   - Database-specific performance characteristics (PostgreSQL, MySQL, SQLite)

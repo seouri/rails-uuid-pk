@@ -203,6 +203,8 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/seouri
 
 Please see our [Security Policy](SECURITY.md) for information about reporting security vulnerabilities.
 
+For detailed architecture documentation, design decisions, and technical rationale, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](MIT-LICENSE).

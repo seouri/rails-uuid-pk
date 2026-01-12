@@ -92,6 +92,7 @@ rails-uuid-pk/
 │   └── rubocop                   # Code quality checker
 ├── .github/workflows/ci.yml      # CI configuration
 ├── rails_uuid_pk.gemspec         # Gem specification
+├── ARCHITECTURE.md               # Architectural decisions and design rationale
 ├── SECURITY.md                   # Security policy and considerations
 ├── PERFORMANCE.md                # Detailed performance analysis and optimization
 └── README.md                     # User documentation
