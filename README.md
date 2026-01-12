@@ -105,11 +105,38 @@ You can still add native PostgreSQL defaults manually if you want maximum perfor
 
 ### Devcontainer Setup
 
-This project includes a devcontainer configuration for VS Code. To get started:
+This project includes a devcontainer configuration for VS Code (highly recommended, as it automatically sets up Ruby 3.3, Rails, PostgreSQL, MySQL, and SQLite in an isolated environment). To get started:
 
 1. Open the project in VS Code
 2. When prompted, click "Reopen in Container" (or run `Dev Containers: Reopen in Container` from the command palette)
 3. The devcontainer will set up Ruby 3.3, Rails, and all dependencies automatically
+
+#### Devcontainer CLI
+
+For terminal-based development or automation, you can use the Devcontainer CLI. The devcontainer will be built and started automatically when you run the exec commands.
+
+##### Installation
+
+- **MacOS**: `brew install devcontainer`
+- **Other systems**: `npm install -g @devcontainers/cli`
+
+##### Usage
+
+Run commands inside the devcontainer:
+
+```bash
+# Install dependencies
+devcontainer exec --workspace-folder . bundle install
+
+# Run tests
+devcontainer exec --workspace-folder . ./bin/test
+
+# Run code quality checks
+devcontainer exec --workspace-folder . ./bin/rubocop
+
+# Interactive shell
+devcontainer exec --workspace-folder . bash
+```
 
 ### Running Tests
 
