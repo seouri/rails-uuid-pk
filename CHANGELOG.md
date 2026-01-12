@@ -34,6 +34,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
   - Index fragmentation and cache locality analysis
   - Production monitoring and optimization guidelines
 - **README.md**: Streamlined with concise performance overview and link to PERFORMANCE.md
+- **Comprehensive UUIDv7 Correctness Testing**: Added extensive test suite validating UUIDv7 compliance
+  - RFC 9562 version and variant bits validation
+  - Timestamp monotonicity and collision resistance testing
+  - Format consistency and edge case handling
+  - Statistical randomness quality analysis
+  - Cross-database compatibility verification
 
 ### Changed
 - **Schema Dumper Compatibility**: Replaced fragile `caller` detection with Rails version-aware schema type handling

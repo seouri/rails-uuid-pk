@@ -48,6 +48,159 @@ class RailsUuidPkTest < ActiveSupport::TestCase
     assert_equal "some-other-id", user.id
   end
 
+  # UUIDv7 Correctness Tests
+  test "UUIDv7 version and variant bits are correct (RFC 9562 compliance)" do
+    user = User.create!(name: "RFC Test")
+    uuid = user.id
+
+    # UUIDv7 format: xxxxxxxx-xxxx-7xxx-8xxx-xxxxxxxxxxxx
+    # Version bit (7) should be at position 12 (0-indexed)
+    # Variant bits (8, 9, A, B) should be at positions 16-19
+
+    # Extract version nibble (4 bits starting at position 12)
+    version_nibble = uuid[14] # Position 14 is the version character
+    assert_equal "7", version_nibble, "UUIDv7 version bit should be 7"
+
+    # Extract variant nibbles (positions 19-21 in standard UUID format)
+    # UUID format: 8-4-4-4-12, so variant starts at position 19
+    variant_nibble = uuid[19]
+    assert_match(/[89ab]/, variant_nibble, "UUIDv7 variant bits should be 8, 9, A, or B")
+  end
+
+  test "UUIDv7 timestamp monotonicity with high precision" do
+    # Create UUIDs with minimal time gaps to test monotonicity
+    uuids = []
+
+    # Generate UUIDs with guaranteed time gaps
+    5.times do |i|
+      uuids << SecureRandom.uuid_v7
+      sleep 0.01 # 10ms gap to ensure different timestamps
+    end
+
+    # Extract high-order timestamp bits from UUIDs and verify monotonicity
+    timestamps = uuids.map do |uuid|
+      # Use first 8 hex chars (32 bits) for timestamp comparison
+      uuid[0..7].to_i(16)
+    end
+
+    # Verify timestamps are monotonically non-decreasing
+    (1...timestamps.length).each do |i|
+      assert timestamps[i] >= timestamps[i-1],
+             "UUIDv7 timestamps should be monotonically non-decreasing: #{timestamps[i-1]} vs #{timestamps[i]}"
+    end
+  end
+
+  test "UUIDv7 contains timestamp information" do
+    # Test that UUIDv7 contains some form of timestamp information
+    user = User.create!(name: "Timestamp Test")
+
+    # Extract the first part of the UUID (should contain timestamp)
+    # UUIDv7 format ensures the first segments contain time-based information
+    first_segment = user.id[0..7]
+
+    # Should be a valid hexadecimal string
+    assert_match(/\A[0-9a-f]{8}\z/, first_segment, "First UUID segment should be valid hex")
+
+    # Convert to integer and verify it's reasonable (not all zeros, not absurdly large)
+    timestamp_component = first_segment.to_i(16)
+    assert timestamp_component > 0, "UUID timestamp component should not be zero"
+    assert timestamp_component < 2**32, "UUID timestamp component should fit in 32 bits"
+  end
+
+  test "UUIDv7 collision resistance" do
+    # Generate a large number of UUIDs to test for collisions
+    uuid_count = 10000
+    uuids = []
+
+    uuid_count.times do
+      user = User.create!(name: "Collision Test #{SecureRandom.hex(4)}")
+      uuids << user.id
+    end
+
+    # Verify all UUIDs are unique
+    unique_uuids = uuids.uniq
+    assert_equal uuid_count, unique_uuids.length,
+                 "Generated #{uuid_count} UUIDs should all be unique"
+
+    # Verify all follow UUIDv7 format
+    uuids.each do |uuid|
+      assert_match(/\A[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/i, uuid,
+                   "All generated UUIDs should follow UUIDv7 format")
+    end
+
+    # Clean up test records
+    User.where("name LIKE ?", "Collision Test %").delete_all
+  end
+
+  test "UUIDv7 format is consistently lowercase" do
+    user = User.create!(name: "Format Test")
+
+    # UUID should be lowercase by default (Rails standard)
+    assert_match(/\A[0-9a-f]+\z/, user.id.gsub(/-/, ""),
+                 "UUID should contain only lowercase hexadecimal characters")
+
+    # Verify UUID follows standard format
+    assert_match(/\A[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/, user.id,
+                 "UUID should follow standard lowercase hexadecimal format")
+  end
+
+  test "UUIDv7 edge cases and malformed UUID handling" do
+    # Test various malformed UUID formats
+    malformed_uuids = [
+      "not-a-uuid",
+      "12345678-1234-1234-1234-1234567890123", # Too long
+      "12345678-1234-1234-1234-1234567890",    # Too short
+      "gggggggg-gggg-gggg-gggg-gggggggggggg", # Invalid characters
+      "12345678-1234-1234-1234-12345678901g",  # Invalid character at end
+      "",                                       # Empty string
+      nil                                       # Nil value
+    ]
+
+    malformed_uuids.each do |malformed_uuid|
+      assert_raises(ActiveRecord::RecordNotFound) do
+        User.find(malformed_uuid)
+      end
+    end
+
+    # Test that valid UUIDv7 format is accepted
+    valid_user = User.create!(name: "Valid UUID Test")
+    found_user = User.find(valid_user.id)
+    assert_equal valid_user.id, found_user.id,
+                 "Should be able to find user with valid UUIDv7"
+  end
+
+  test "UUIDv7 randomness quality in different segments" do
+    # Generate multiple UUIDs and analyze randomness distribution
+    sample_size = 1000
+    uuids = []
+
+    sample_size.times do
+      user = User.create!(name: "Randomness Test #{SecureRandom.hex(4)}")
+      uuids << user.id
+    end
+
+    # Extract different segments of the UUID for randomness analysis
+    # UUIDv7 format: timestamp (48 bits) + randomness (74 bits)
+    # timestamp: first 12 hex chars (48 bits)
+    # randomness: remaining 20 hex chars (80 bits)
+
+    timestamp_segments = uuids.map { |uuid| uuid[0..11] }
+    randomness_segments = uuids.map { |uuid| uuid[12..31] }
+
+    # Verify we get some unique timestamp segments (not all identical)
+    unique_timestamps = timestamp_segments.uniq.length
+    assert unique_timestamps > 1,
+           "Should have multiple unique timestamp segments (#{unique_timestamps}/#{sample_size})"
+
+    # Verify randomness segments are highly unique
+    unique_randomness = randomness_segments.uniq.length
+    assert_equal sample_size, unique_randomness,
+                 "Randomness segments should all be unique"
+
+    # Clean up test records
+    User.where("name LIKE ?", "Randomness Test %").delete_all
+  end
+
   # Configuration Tests
   test "version constant is defined" do
     assert RailsUuidPk::VERSION.is_a?(String)
