@@ -39,19 +39,19 @@ For AI coding agents that operate via command-line interfaces (such as Gemini CL
    npm install -g @devcontainers/cli
    ```
 
-2. **Access the devcontainer** for command execution:
+2. **Access the devcontainer** for command execution (run from project root):
    ```bash
    # Execute commands inside the running devcontainer
-   devcontainer exec --workspace-folder /workspaces/rails-uuid-pk bundle install
+   devcontainer exec --workspace-folder . bundle install
 
    # Run tests
-   devcontainer exec --workspace-folder /workspaces/rails-uuid-pk ./bin/test
+   devcontainer exec --workspace-folder . ./bin/test
 
    # Run code quality checks
-   devcontainer exec --workspace-folder /workspaces/rails-uuid-pk ./bin/rubocop
+   devcontainer exec --workspace-folder . ./bin/rubocop
 
    # Interactive shell access
-   devcontainer exec --workspace-folder /workspaces/rails-uuid-pk bash
+   devcontainer exec --workspace-folder . bash
    ```
 
 #### Alternative Access Methods
@@ -66,7 +66,7 @@ docker exec -it <container-id> ./bin/test
 ```
 
 #### Best Practices for Terminal Agents
-- **Always specify workspace folder**: Use `--workspace-folder /workspaces/rails-uuid-pk` to ensure correct container context
+- **Always specify workspace folder**: Use `--workspace-folder .` to ensure correct container context
 - **Sequential execution**: Run commands one at a time and wait for completion
 - **Environment awareness**: Be aware that file paths and environment variables may differ between host and container
 - **Use project scripts**: Prefer `./bin/test` and `./bin/rubocop` over direct `bundle exec` commands for consistency
