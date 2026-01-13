@@ -32,6 +32,8 @@ If you discover a security vulnerability in rails-uuid-pk, please:
 
 This gem uses **UUIDv7** (RFC 9562) for primary key generation, which provides the following security characteristics:
 
+> **Privacy Consideration**: UUIDv7 includes a timestamp component that reveals approximate record creation time. Do not use if creation timestamp must be hidden.
+
 #### Strengths
 - **Cryptographically Secure Generation**: Uses Ruby's `SecureRandom.uuid_v7()` backed by system CSPRNG (OpenSSL or system entropy)
 - **Monotonic Ordering**: Time-based ordering prevents index fragmentation while maintaining unpredictability
