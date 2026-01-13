@@ -24,4 +24,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "mysql2", "~> 0.5.7"
   spec.add_development_dependency "pg", "~> 1.6.3"
   spec.add_development_dependency "sqlite3", "~> 2.9.0"
+  spec.add_development_dependency "yard", "~> 0.9"
 end

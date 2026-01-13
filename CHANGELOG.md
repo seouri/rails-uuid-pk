@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 
 ### Documentation
 - **Bulk Operations Awareness**: Added comprehensive documentation about bulk operations limitation across README.md, ARCHITECTURE.md, PERFORMANCE.md, and AGENTS.md, clarifying that `Model.import` and `Model.insert_all` bypass callbacks and require explicit UUID assignment
+- **YARD API Documentation**: Added comprehensive YARD documentation to all core library files, achieving 100% documentation coverage with detailed method descriptions, parameter specifications, usage examples, and cross-references for improved developer experience
 
 ### Security
 - **Enhanced Timestamp Privacy Documentation**: Added explicit privacy consideration warning in SECURITY.md about UUIDv7 timestamp exposure, clarifying that UUIDv7 includes a timestamp component that reveals approximate record creation time and advising against use when creation timestamps must be hidden
@@ -32,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 - Added debug logging in `migration_helpers.rb` for foreign key type detection
 - Enhanced adapter extensions with proper logging instead of console output
 - All logging uses structured format with `[RailsUuidPk]` prefix for easy filtering
+- Added `yard` as development dependency for automated documentation generation
 
 ## [0.8.0] - 2026-01-12
 

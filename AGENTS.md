@@ -188,9 +188,65 @@ cd test/dummy && rails test
 2. **Check existing patterns**: Review similar functionality in the codebase
 3. **Write tests first**: Add tests for new features/fixes
 4. **Implement changes**: Follow existing code patterns
-5. **Run tests**: Ensure all tests pass (`./bin/test`)
-6. **Code quality**: Run RuboCop (`./bin/rubocop`)
-7. **Update documentation**: README, CHANGELOG if needed
+5. **Update YARD documentation**: Add/update YARD comments for any new/modified code
+6. **Run tests**: Ensure all tests pass (`./bin/test`)
+7. **Code quality**: Run RuboCop (`./bin/rubocop`)
+8. **Verify documentation**: Run `yard doc lib/` to ensure 100% documentation coverage
+9. **Update documentation**: README, CHANGELOG if needed
+
+### YARD Documentation Guidelines
+
+**Always update YARD documentation when making code changes:**
+
+#### When Adding New Code
+```ruby
+# For new modules/classes
+# @example Usage example
+#   MyClass.new.do_something
+class MyClass
+  # @param param [Type] Description of parameter
+  # @return [ReturnType] Description of return value
+  def my_method(param)
+    # implementation
+  end
+end
+```
+
+#### When Modifying Existing Code
+- **Update method descriptions** if behavior changes
+- **Add/modify parameter documentation** (`@param`) for new/changed parameters
+- **Update return types** (`@return`) if they change
+- **Add examples** (`@example`) for complex functionality
+- **Update `@see` references** for related components
+
+#### Required YARD Tags
+- `@param [Type] description` - For all method parameters
+- `@return [Type] description` - For all return values (use `[void]` for no return)
+- `@example` - Code examples showing usage
+- `@see ClassName` - Cross-references to related classes/modules
+- `@note` - Important implementation notes
+
+#### Verification Steps
+```bash
+# Generate documentation and check coverage
+yard doc lib/
+
+# Expected output should show:
+# Files:           8
+# Modules:         7 (    0 undocumented)
+# Classes:         2 (    0 undocumented)
+# Constants:       2 (    0 undocumented)
+# Methods:        19 (    0 undocumented)
+# 100.00% documented
+```
+
+#### Best Practices
+- **Keep examples realistic** and runnable
+- **Document edge cases** and error conditions
+- **Use consistent parameter naming** in examples
+- **Reference RFCs/specs** for standards compliance (e.g., UUIDv7)
+- **Document Rails version specifics** when applicable
+- **Include performance implications** for complex operations
 
 ### Common Tasks
 
