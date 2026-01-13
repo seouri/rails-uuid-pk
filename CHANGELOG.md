@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 
 ## [0.9.0] - 2026-01-13
 
+### Documentation
+- **Bulk Operations Awareness**: Added comprehensive documentation about bulk operations limitation across README.md, ARCHITECTURE.md, PERFORMANCE.md, and AGENTS.md, clarifying that `Model.import` and `Model.insert_all` bypass callbacks and require explicit UUID assignment
+
 ### Security
 - **Enhanced Timestamp Privacy Documentation**: Added explicit privacy consideration warning in SECURITY.md about UUIDv7 timestamp exposure, clarifying that UUIDv7 includes a timestamp component that reveals approximate record creation time and advising against use when creation timestamps must be hidden
 

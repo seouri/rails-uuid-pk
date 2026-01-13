@@ -128,6 +128,17 @@ CREATE TABLE users (
 4. **Zero Dependencies**: No database-specific setup or extensions required
 5. **Performance**: `SecureRandom.uuid_v7` is sufficiently fast for most applications
 
+#### Bulk Operations Limitation
+The app-level callback approach has one important limitation: bulk operations bypass ActiveRecord callbacks. This means operations like `Model.import` or `Model.insert_all` won't automatically generate UUIDs. Applications requiring bulk imports must explicitly assign UUIDs:
+
+```ruby
+# Manual UUID assignment required for bulk operations
+users = [{ name: "Alice", id: SecureRandom.uuid_v7 }, { name: "Bob", id: SecureRandom.uuid_v7 }]
+User.insert_all(users) # Bypasses callbacks, requires explicit IDs
+```
+
+This is a conscious trade-off for universal compatibility and zero-configuration benefits.
+
 ### Decision 2: UUIDv7 vs Other UUID Versions
 
 #### Chosen: UUIDv7 (RFC 9562)

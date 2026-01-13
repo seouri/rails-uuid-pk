@@ -215,6 +215,12 @@ cd test/dummy && rails test
 3. Update railtie in `lib/rails_uuid_pk/railtie.rb` if inclusion logic changes
 4. Test with both SQLite and PostgreSQL databases
 
+#### Bulk Operations
+1. Remember that bulk operations (`Model.import`, `Model.insert_all`) bypass callbacks
+2. Explicitly assign UUIDs when using bulk operations to avoid data integrity issues
+3. Consider performance implications: bulk operations are faster but require manual UUID management
+4. Test bulk operation scenarios to ensure data consistency
+
 ## Troubleshooting
 
 ### Common Issues

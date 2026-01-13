@@ -108,6 +108,16 @@ end
 
 For comprehensive performance analysis, scaling strategies, and optimization guides, see [PERFORMANCE.md](PERFORMANCE.md).
 
+## Bulk Operations
+
+**Important**: Bulk operations like `Model.import` bypass ActiveRecord callbacks, so UUIDs won't be automatically generated for bulk-inserted records. Use explicit UUID assignment or a custom bulk import method if needed.
+
+```ruby
+# Manual UUID assignment for bulk operations
+users = [{ name: "Alice", id: SecureRandom.uuid_v7 }, { name: "Bob", id: SecureRandom.uuid_v7 }]
+User.insert_all(users) # Bypasses callbacks, requires explicit IDs
+```
+
 ## Why not use native PostgreSQL `uuidv7()`?
 
 While PostgreSQL 18+ has excellent native `uuidv7()` support, the **fallback approach** was chosen for maximum compatibility:
