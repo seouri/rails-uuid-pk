@@ -7,11 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 
 ## [0.9.0] - 2026-01-13
 
+### Added
+- **Logging and Observability Framework**: Added comprehensive logging infrastructure for production debugging and monitoring
+  - `RailsUuidPk.logger` and `RailsUuidPk.log` methods with Rails logger integration
+  - Debug logging for UUID assignment tracking in models
+  - Debug logging for foreign key type detection in migrations
+  - Debug logging for database adapter UUID type registration
+  - Production-ready logging with configurable log levels
+
+### Improved
+- **Code Quality**: Replaced `puts` statements with proper logging infrastructure
+- **Debugging Support**: Enhanced observability for troubleshooting production issues
+- **Log Aggregation**: Compatible with existing Rails logging and monitoring systems (Datadog, CloudWatch, etc.)
+
 ### Documentation
 - **Bulk Operations Awareness**: Added comprehensive documentation about bulk operations limitation across README.md, ARCHITECTURE.md, PERFORMANCE.md, and AGENTS.md, clarifying that `Model.import` and `Model.insert_all` bypass callbacks and require explicit UUID assignment
 
 ### Security
 - **Enhanced Timestamp Privacy Documentation**: Added explicit privacy consideration warning in SECURITY.md about UUIDv7 timestamp exposure, clarifying that UUIDv7 includes a timestamp component that reveals approximate record creation time and advising against use when creation timestamps must be hidden
+
+### Technical Details
+- Added logging framework in `lib/rails_uuid_pk.rb` with Rails logger fallback
+- Implemented debug logging in `concern.rb` for UUIDv7 assignment tracking
+- Added debug logging in `migration_helpers.rb` for foreign key type detection
+- Enhanced adapter extensions with proper logging instead of console output
+- All logging uses structured format with `[RailsUuidPk]` prefix for easy filtering
 
 ## [0.8.0] - 2026-01-12
 

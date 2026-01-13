@@ -12,7 +12,9 @@ module RailsUuidPk
       # Skip if id was already set (manual set, bulk insert with ids, etc)
       return if id.present?
 
-      self.id = SecureRandom.uuid_v7
+      uuid = SecureRandom.uuid_v7
+      RailsUuidPk.log(:debug, "Assigned UUIDv7 #{uuid} to #{self.class.name}")
+      self.id = uuid
     end
   end
 end

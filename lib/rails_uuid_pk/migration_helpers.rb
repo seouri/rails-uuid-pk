@@ -12,6 +12,7 @@ module RailsUuidPk
         current_type = options[:type]
         if (current_type.nil? || current_type == :integer || current_type == :bigint) &&
            (uuid_primary_key?(ref_table) || (options[:polymorphic] && application_uses_uuid_primary_keys?))
+          RailsUuidPk.log(:debug, "Setting foreign key #{ref_name} to UUID type (referencing #{ref_table})")
           options[:type] = :uuid
         end
 
@@ -24,6 +25,7 @@ module RailsUuidPk
         current_type = options[:type]
         if (current_type.nil? || current_type == :integer || current_type == :bigint) &&
            (uuid_primary_key?(ref_table) || (options[:polymorphic] && application_uses_uuid_primary_keys?))
+          RailsUuidPk.log(:debug, "Setting foreign key #{ref_name} to UUID type (referencing #{ref_table})")
           options[:type] = :uuid
         end
 

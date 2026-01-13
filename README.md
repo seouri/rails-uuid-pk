@@ -19,6 +19,7 @@ Automatically use UUID v7 for **all primary keys** in Rails applications. Works 
 - **SQLite**: Uses `VARCHAR(36)` with custom ActiveRecord type handling
 - Zero database extensions needed
 - Minimal and maintainable — no monkey-patching hell
+- Production-ready logging for debugging and monitoring
 
 ## Installation
 

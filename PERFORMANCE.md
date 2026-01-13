@@ -203,6 +203,7 @@ SET work_mem = '256MB'; -- Increase for complex UUID queries
 - [ ] **Connection Pooling**: Verify database connection limits support UUID workloads
 - [ ] **Query Optimization**: Review and optimize all critical queries involving UUIDs
 - [ ] **Monitoring Setup**: Implement index health and query performance monitoring
+- [ ] **Logging Configuration**: Enable debug logging for UUID operations when troubleshooting
 
 #### Ongoing Maintenance Tasks
 

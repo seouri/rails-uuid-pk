@@ -7,6 +7,7 @@ module RailsUuidPk
     end
 
     def register_uuid_types(m = type_map)
+      RailsUuidPk.log(:debug, "Registering UUID types on #{m.class}")
       m.register_type(/varchar\(36\)/i) { RailsUuidPk::Type::Uuid.new }
       m.register_type("uuid") { RailsUuidPk::Type::Uuid.new }
     end

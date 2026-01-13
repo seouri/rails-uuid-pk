@@ -120,6 +120,12 @@ rails-uuid-pk/
    - Database-specific configurations (SQLite schema format, type mappings)
    - Includes migration helpers in ActiveRecord migration classes
 
+4. **Logging Framework (`lib/rails_uuid_pk.rb`)**:
+   - `RailsUuidPk.logger` and `RailsUuidPk.log` methods for structured logging
+   - Integrates with Rails logger for production debugging and monitoring
+   - Debug logging for UUID assignment, migration helpers, and adapter registration
+   - Production-ready logging with configurable levels and log aggregation support
+
 ### Key Design Decisions
 
 - **Railtie-based inclusion**: Automatic integration without requiring model changes

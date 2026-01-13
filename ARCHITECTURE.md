@@ -69,6 +69,13 @@ end
 - Database adapter extensions
 - Generator configuration
 
+#### Logging Framework (`lib/rails_uuid_pk.rb`)
+**Responsibilities**:
+- Structured logging infrastructure
+- Rails logger integration with fallback
+- Debug logging for troubleshooting
+- Production observability support
+
 ### 2. Database Adapter Extensions
 
 #### PostgreSQL (`pg` gem integration)
