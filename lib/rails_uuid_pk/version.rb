@@ -7,6 +7,6 @@ module RailsUuidPk
   #
   # @return [String] The current version
   # @example
-  #   RailsUuidPk::VERSION # => "0.9.0"
-  VERSION = "0.9.0"
+  #   RailsUuidPk::VERSION # => "0.10.0"
+  VERSION = "0.10.0"
 end
