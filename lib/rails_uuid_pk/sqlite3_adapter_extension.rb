@@ -48,7 +48,9 @@ module RailsUuidPk
     #
     # @return [void]
     def configure_connection
-      super
+      # Only call super if not inside a transaction, as PRAGMA statements
+      # cannot be executed inside transactions in SQLite
+      super unless open_transactions > 0
       register_uuid_types
     end
   end

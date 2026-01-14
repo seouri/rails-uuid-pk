@@ -8,6 +8,7 @@ This document provides detailed performance analysis and optimization guidance f
 - **Cryptographically Secure**: Backed by system CSPRNG (OpenSSL or system entropy)
 - **Monotonic Ordering**: Time-based ordering prevents index fragmentation
 - **Zero Collision Risk**: 128-bit randomness with structured timestamp component
+- **Ruby 4.0 Compatible**: Fixed compatibility issues with SecureRandom and benchmark libraries
 
 **Memory Efficient**: Minimal memory overhead for bulk operations
 

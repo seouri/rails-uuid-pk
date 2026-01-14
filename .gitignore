@@ -5,6 +5,8 @@
 /pkg/
 /tmp/
 *.gem
+.DS_Store
+coverage/
 /test/dummy/db/*.sqlite3
 /test/dummy/db/*.sqlite3-*
 /test/dummy/log/*.log*

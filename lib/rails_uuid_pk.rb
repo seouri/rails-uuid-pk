@@ -40,13 +40,27 @@ module RailsUuidPk
 
   # Returns the logger instance for this gem.
   #
-  # Uses Rails.logger if available, otherwise creates a new Logger instance.
+  # Uses Rails.logger if available and not nil, otherwise creates a new Logger instance.
   #
   # @return [Logger] The logger instance
   # @example
   #   RailsUuidPk.logger.info("Custom message")
   def self.logger
-    @logger ||= defined?(Rails.logger) ? Rails.logger : Logger.new($stdout)
+    return @logger if @logger
+
+    rails_logger = defined?(Rails.logger) && Rails.logger
+    @logger = rails_logger || Logger.new($stdout)
+    @logger = Logger.new($stdout) unless @logger.is_a?(Logger)
+    @logger
+  end
+
+  # Sets the logger instance for this gem.
+  #
+  # @param logger [Logger] The logger instance to use
+  # @example
+  #   RailsUuidPk.logger = Rails.logger
+  def self.logger=(logger)
+    @logger = logger
   end
 
   # Logs a message at the specified level.

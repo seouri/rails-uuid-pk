@@ -1,20 +1,76 @@
 #!/usr/bin/env ruby
 $: << File.expand_path("../test", __dir__)
 
-require "bundler/setup"
+# Set up SimpleCov for test coverage when COVERAGE environment variable is set
+# MUST be loaded before any application code
+if ENV["COVERAGE"] == "true"
+  require "bundler/setup"
+  require "simplecov"
+  SimpleCov.start do
+    # Set the root directory to the project root
+    root File.expand_path("../", __dir__)
+    # Filter out test files and dummy app
+    add_filter "/test/"
+    add_filter "/spec/"
+    add_filter "/test/dummy/"
+    # Track coverage for the lib directory (the actual gem code)
+    add_group "Library", "lib/"
+    coverage_dir "coverage"
+    # Enable merging for multi-process test runs (SQLite, PostgreSQL, MySQL)
+    enable_coverage :branch
+    primary_coverage :line
+    merge_timeout 3600
+  end
+else
+  require "bundler/setup"
+end
 
 if ENV['DB'].nil?
   puts "Running tests with SQLite..."
-  system({"RAILS_ENV" => "test", "DB" => "sqlite"}, "ruby", __FILE__)
+  system({"RAILS_ENV" => "test", "DB" => "sqlite"}, "ruby", __FILE__, *ARGV)
 
   puts "Running tests with PostgreSQL..."
-  system({"RAILS_ENV" => "test_postgresql", "DB" => "postgres"}, "ruby", __FILE__)
+  system({"RAILS_ENV" => "test_postgresql", "DB" => "postgres"}, "ruby", __FILE__, *ARGV)
 
   puts "Running tests with MySQL..."
-  system({"RAILS_ENV" => "test_mysql", "DB" => "mysql"}, "ruby", __FILE__)
+  system({"RAILS_ENV" => "test_mysql", "DB" => "mysql"}, "ruby", __FILE__, *ARGV)
 else
+  # Set RAILS_ENV based on DB if not already set
+  case ENV['DB']
+  when 'sqlite'
+    ENV['RAILS_ENV'] ||= 'test'
+  when 'postgres'
+    ENV['RAILS_ENV'] ||= 'test_postgresql'
+  when 'mysql'
+    ENV['RAILS_ENV'] ||= 'test_mysql'
+  end
+
   require "rails/plugin/test"
 
-  # Manually load the test file
-  require "rails_uuid_pk_test"
+  # Ensure migration helpers are loaded for individual test runs
+  require "active_record"
+  require "rails"
+  require "rails_uuid_pk"
+  require "rails_uuid_pk/migration_helpers"
+  ActiveRecord::Migration.prepend(RailsUuidPk::MigrationHelpers::References)
+  ActiveRecord::ConnectionAdapters::TableDefinition.prepend(RailsUuidPk::MigrationHelpers::References)
+  ActiveRecord::ConnectionAdapters::Table.prepend(RailsUuidPk::MigrationHelpers::References)
+  ActiveRecord::ConnectionAdapters::AbstractAdapter.prepend(RailsUuidPk::MigrationHelpers::References)
+
+  if ARGV.empty?
+    # Load all organized test files
+    test_files = Dir[File.expand_path("../test/**/*_test.rb", __dir__)]
+    test_files.each { |file| require file }
+  else
+    # Load only specified test files
+    test_files = ARGV.map { |path| File.expand_path("../#{path}", __dir__) }
+    test_files.each do |file|
+      if File.exist?(file)
+        require file
+      else
+        puts "Test file not found: #{file}"
+        exit 1
+      end
+    end
+  end
 end

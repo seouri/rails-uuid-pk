@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
-## [0.9.0] - 2026-01-13
+## [0.9.0] - 2026-01-14
 
 ### Added
 - **Logging and Observability Framework**: Added comprehensive logging infrastructure for production debugging and monitoring
@@ -14,6 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
   - Debug logging for foreign key type detection in migrations
   - Debug logging for database adapter UUID type registration
   - Production-ready logging with configurable log levels
+- **Comprehensive CI/CD Pipeline**: Enterprise-grade continuous integration with security scanning, multi-version testing, performance monitoring, and automated quality assurance
+  - Dependency vulnerability scanning with `bundler-audit`
+  - Code coverage reporting with `simplecov` and Codecov integration
+  - Multi-Ruby testing (3.3, 3.4, 4.0) across PostgreSQL 18, MySQL 9, and SQLite
+  - Performance benchmarking with automated `bin/benchmark` script
+  - Job dependencies for efficient CI execution and faster failure detection
+- **Enhanced Database Support**: Updated to latest database versions (PostgreSQL 18, MySQL 9) for optimal performance and compatibility
+- **Improved Executable Scripts**: Professional-grade command-line tools with comprehensive error handling, progress feedback, and documentation
+  - `bin/coverage`: Enhanced with proper error handling and user feedback
+  - `bin/benchmark`: Renamed from `bin/performance` following standard naming conventions
+- **Ruby 4.0 Compatibility**: Fixed all compatibility issues including benchmark warnings and dependency management
 
 ### Improved
 - **Code Quality**: Replaced `puts` statements with proper logging infrastructure
@@ -24,10 +35,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 - **Bulk Operations Awareness**: Added comprehensive documentation about bulk operations limitation across README.md, ARCHITECTURE.md, PERFORMANCE.md, and AGENTS.md, clarifying that `Model.import` and `Model.insert_all` bypass callbacks and require explicit UUID assignment
 - **YARD API Documentation**: Added comprehensive YARD documentation to all core library files, achieving 100% documentation coverage with detailed method descriptions, parameter specifications, usage examples, and cross-references for improved developer experience
 
+### Changed
+- **Dependency Management**: Moved CI and development tools to `gemspec` for consistency and proper gem packaging
+- **Script Naming**: Renamed `bin/performance` to `bin/benchmark` following industry standards
+- **CI Workflow**: Comprehensive pipeline with security, testing, coverage, and performance validation
+- **Database Versions**: Updated to PostgreSQL 18 and MySQL 9 for cutting-edge support
+
 ### Security
 - **Enhanced Timestamp Privacy Documentation**: Added explicit privacy consideration warning in SECURITY.md about UUIDv7 timestamp exposure, clarifying that UUIDv7 includes a timestamp component that reveals approximate record creation time and advising against use when creation timestamps must be hidden
 
 ### Technical Details
+- Added `bundler-audit`, `simplecov`, `benchmark-ips`, and `benchmark` as development dependencies
+- Implemented Ruby 4.0 compatibility fixes for SecureRandom and benchmark libraries
+- Enhanced CI matrix with 9 test combinations across multiple Ruby and database versions
+- Added comprehensive error handling and logging to executable scripts
+- Implemented job dependencies in GitHub Actions for optimal CI performance
 - Added logging framework in `lib/rails_uuid_pk.rb` with Rails logger fallback
 - Implemented debug logging in `concern.rb` for UUIDv7 assignment tracking
 - Added debug logging in `migration_helpers.rb` for foreign key type detection
