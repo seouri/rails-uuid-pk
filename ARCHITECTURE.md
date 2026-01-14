@@ -73,20 +73,22 @@ end
 **Responsibilities**:
 - Structured logging infrastructure
 - Rails logger integration with fallback
-- Debug logging for troubleshooting
+- Debug logging for UUID assignment, migration helpers, and adapter registration
 - Production observability support
+- Structured logging with `[RailsUuidPk]` prefix for easy filtering
+- Compatible with existing Rails logging and monitoring systems (Datadog, CloudWatch, etc.)
 
 ### 2. Database Adapter Extensions
 
 #### PostgreSQL (`pg` gem integration)
 - Native UUID type support (16 bytes)
 - Full database function compatibility
-- Optimized for PostgreSQL's UUID handling
+- Optimized for PostgreSQL 18's enhanced UUID handling
 
 #### MySQL (`mysql2` gem integration)
 - VARCHAR(36) storage for UUIDs
 - Custom type mapping for ActiveRecord
-- Compatible with MySQL 8.0+ string handling
+- Compatible with MySQL 9 string handling and performance optimizations
 
 #### SQLite (`sqlite3` gem integration)
 - VARCHAR(36) storage for UUIDs

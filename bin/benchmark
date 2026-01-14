@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Performance benchmark for rails-uuid-pk
+# Usage: bin/benchmark
+# Measures UUIDv7 generation performance using Ruby's SecureRandom.uuid_v7
+
+require "bundler/setup"
+
+begin
+  require "securerandom"
+  require "benchmark/ips"
+rescue LoadError => e
+  warn "Error: Required gems not available - #{e.message}"
+  warn "Run 'bundle install' to install dependencies"
+  exit 1
+end
+
+puts "Rails UUID PK Performance Benchmark"
+puts "=" * 50
+puts "Ruby version: #{RUBY_VERSION}"
+puts "Rails version: #{defined?(Rails) ? Rails::VERSION::STRING : 'Not loaded'}"
+puts ""
+
+# Test UUIDv7 generation performance
+puts "UUIDv7 Generation Performance"
+puts "-" * 35
+puts "Testing SecureRandom.uuid_v7 generation speed..."
+puts ""
+
+begin
+  Benchmark.ips do |x|
+    x.report("SecureRandom.uuid_v7") do
+      SecureRandom.uuid_v7
+    end
+
+    x.compare!
+  end
+rescue => e
+  warn "Benchmark failed: #{e.message}"
+  exit 1
+end
+
+puts ""
+puts "✅ Benchmark completed successfully!"
+puts "   Results show UUID generation performance in iterations per second."

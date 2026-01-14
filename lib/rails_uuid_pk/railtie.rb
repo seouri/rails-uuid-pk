@@ -110,6 +110,7 @@ module RailsUuidPk
       ActiveSupport.on_load(:active_record) do
         require "rails_uuid_pk/migration_helpers"
 
+        ActiveRecord::Migration.prepend(RailsUuidPk::MigrationHelpers::References)
         ActiveRecord::ConnectionAdapters::TableDefinition.prepend(RailsUuidPk::MigrationHelpers::References)
         ActiveRecord::ConnectionAdapters::Table.prepend(RailsUuidPk::MigrationHelpers::References)
         ActiveRecord::ConnectionAdapters::AbstractAdapter.prepend(RailsUuidPk::MigrationHelpers::References)

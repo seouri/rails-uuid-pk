@@ -89,7 +89,71 @@ module RailsUuidPk
       # @note This checks Rails generator configuration for primary_key_type
       def application_uses_uuid_primary_keys?
         # Check if the application is configured to use UUID primary keys globally
-        defined?(Rails) && Rails.application.config.generators.options[:active_record]&.[](:primary_key_type) == :uuid
+        return false unless defined?(Rails) && Rails.application&.config&.generators&.options
+
+        active_record_config = Rails.application.config.generators.options[:active_record]
+        active_record_config.is_a?(Hash) && active_record_config[:primary_key_type] == :uuid
+      end
+
+      # Module-level access to application_uses_uuid_primary_keys? for testing.
+      #
+      # This method is exposed for testing purposes only and should not be used
+      # in production code. It creates a temporary instance to access the instance method.
+      #
+      # @return [Boolean] true if the application uses UUID primary keys by default
+      # @api private
+      # @note For testing only - do not use in production code
+      def self.application_uses_uuid_primary_keys?
+        # Create a dummy class to include the module and call the method
+        dummy_class = Class.new { include RailsUuidPk::MigrationHelpers::References }
+        dummy_class.new.application_uses_uuid_primary_keys?
+      end
+
+      # Module-level access to uuid_primary_key? for testing.
+      #
+      # This method is exposed for testing purposes only and should not be used
+      # in production code. It creates a temporary instance to access the private method.
+      #
+      # @param table_name [String, Symbol] The name of the table to check
+      # @param mock_conn [Object] Optional mock connection for testing
+      # @return [Boolean] true if the table's primary key is a UUID type
+      # @api private
+      # @note For testing only - do not use in production code
+      def self.test_uuid_primary_key?(table_name, mock_conn = nil)
+        # Create a dummy class to include the module and make the method public for testing
+        dummy_class = Class.new do
+          include RailsUuidPk::MigrationHelpers::References
+          # For testing, provide a connection method that returns the mock_conn
+          define_method(:connection) { mock_conn } if mock_conn
+          # Make the private method public for testing
+          public :uuid_primary_key?
+        end
+        instance = dummy_class.new
+        instance.instance_variable_set(:@conn, mock_conn) if mock_conn
+        instance.uuid_primary_key?(table_name)
+      end
+
+      # Module-level access to find_primary_key_column for testing.
+      #
+      # This method is exposed for testing purposes only and should not be used
+      # in production code. It creates a temporary instance to access the private method.
+      #
+      # @param table_name [String, Symbol] The name of the table
+      # @param conn [ActiveRecord::ConnectionAdapters::AbstractAdapter] The database connection
+      # @return [ActiveRecord::ConnectionAdapters::Column, nil] The primary key column or nil
+      # @api private
+      # @note For testing only - do not use in production code
+      def self.test_find_primary_key_column(table_name, conn)
+        # Create a dummy class to include the module and make the method public for testing
+        dummy_class = Class.new do
+          include RailsUuidPk::MigrationHelpers::References
+          # For testing, provide a connection method that returns the conn
+          define_method(:connection) { conn }
+          # Make the private method public for testing
+          public :find_primary_key_column
+        end
+        instance = dummy_class.new
+        instance.find_primary_key_column(table_name, conn)
       end
 
       # Alias for references method (ActiveRecord compatibility)

@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Generate test coverage report for rails-uuid-pk
+# Usage: bin/coverage
+# Output: coverage/index.html and coverage/.last_run.json
+
+require "bundler/setup"
+require "json"
+
+def load_coverage_data(filepath)
+  begin
+    JSON.parse(File.read(filepath))
+  rescue Errno::ENOENT => e
+    warn "Coverage file not found: #{e.message}"
+    exit 1
+  rescue JSON::ParserError => e
+    warn "Invalid coverage data format: #{e.message}"
+    exit 1
+  rescue StandardError => e
+    warn "Error reading coverage data: #{e.message}"
+    exit 1
+  end
+end
+
+def extract_coverage_data(resultset_data)
+  # Extract coverage data more robustly
+  test_framework_data = resultset_data.values.first
+  unless test_framework_data&.is_a?(Hash) && test_framework_data['coverage']
+    warn "Invalid coverage data structure: missing coverage information"
+    exit 1
+  end
+
+  test_framework_data['coverage']
+end
+
+def extract_test_framework_name(resultset_data)
+  # Use the actual test framework name from the data
+  framework_name = resultset_data.keys.first
+  framework_name || 'Unknown'
+end
+
+puts "Checking for coverage data..."
+
+resultset_files = Dir["coverage/.resultset.json"]
+
+if resultset_files.empty?
+  puts "No coverage data found. Running tests with coverage enabled..."
+  # Run all database tests with coverage enabled
+  success = system({"COVERAGE" => "true"}, "bin/test")
+  unless success
+    puts "Tests failed. Cannot generate coverage report."
+    exit 1
+  end
+  puts "Tests completed. Regenerating coverage report..."
+end
+
+puts "Formatting coverage report..."
+
+# Load and validate coverage data
+resultset_data = load_coverage_data(resultset_files.first)
+coverage_data = extract_coverage_data(resultset_data)
+test_framework_name = extract_test_framework_name(resultset_data)
+
+# Generate the report
+require "simplecov"
+result = SimpleCov::Result.new(coverage_data)
+result.command_name = test_framework_name
+result.format!
+
+puts "Coverage report generated in coverage/"
+puts "Open coverage/index.html in your browser to view the report."

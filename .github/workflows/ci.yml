@@ -4,10 +4,16 @@ on:
   pull_request:
   push:
     branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       RUBY_VERSION: ruby-3.3
       RUBOCOP_CACHE_ROOT: tmp/rubocop
@@ -27,33 +33,51 @@ jobs:
           DEPENDENCIES_HASH: ${{ hashFiles('**/.rubocop.yml', '**/.rubocop_todo.yml', 'Gemfile.lock') }}
         with:
           path: ${{ env.RUBOCOP_CACHE_ROOT }}
-          key: rubocop-${{ runner.os }}-${{ env.RUBY_VERSION }}-${{ env.DEPENDENCIES_HASH }}-${{ github.ref_name == github.event.repository.default_branch && github.run_id || 'default' }}
+          key: rubocop-${{ runner.os }}-ruby-${{ env.RUBY_VERSION }}-${{ env.DEPENDENCIES_HASH }}
           restore-keys: |
-            rubocop-${{ runner.os }}-${{ env.RUBY_VERSION }}-${{ env.DEPENDENCIES_HASH }}-
+            rubocop-${{ runner.os }}-ruby-${{ env.RUBY_VERSION }}-
 
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Check for known vulnerabilities
+        run: bundle exec bundler-audit --update
+
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [lint, audit]
     strategy:
       matrix:
+        ruby-version: ['3.3', '3.4', '4.0']
         db: [sqlite3, postgresql, mysql]
     services:
       postgres:
-        image: postgres:15
+        image: postgres:18
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD || 'test_password_secure' }}
           POSTGRES_DB: rails_uuid_pk_test
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       mysql:
-        image: mysql:8.0
+        image: mysql:9
         env:
-          MYSQL_ROOT_PASSWORD: ""
-          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_TEST_PASSWORD || 'test_password_secure' }}
           MYSQL_DATABASE: rails_uuid_pk_test
         ports:
           - 3306:3306
@@ -68,11 +92,48 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ruby-3.3
+          ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
 
       - name: Run tests
         run: bin/test
+        env:
+          COVERAGE: true
+
+      - name: Check coverage threshold
+        run: |
+          if [ ! -f coverage/.last_run.json ]; then
+            echo "Error: Coverage file not found"
+            exit 1
+          fi
+
+          COVERAGE_PERCENT=$(ruby -rjson -e "data = JSON.parse(File.read('coverage/.last_run.json')); puts data.dig('result', 'line') || data.dig('result', 'covered_percent') || data.dig('covered_percent') || '0'" 2>/dev/null)
+          if [ $? -ne 0 ] || [ -z "$COVERAGE_PERCENT" ]; then
+            echo "Error: Failed to parse coverage data or no coverage found"
+            exit 1
+          fi
+
+          echo "Coverage: ${COVERAGE_PERCENT}%"
+
+          # Adjusted threshold: 85% (reasonable for library with database integrations)
+          if command -v bc >/dev/null 2>&1 && [[ "$COVERAGE_PERCENT" =~ ^[0-9]*\.?[0-9]+$ ]]; then
+            COMPARISON=$(echo "$COVERAGE_PERCENT < 85.0" | bc -l)
+          else
+            COVERAGE_INT=${COVERAGE_PERCENT%.*}
+            COMPARISON=$([ "$COVERAGE_INT" -lt 85 ] && echo 1 || echo 0)
+          fi
+
+          if [ "$COMPARISON" -eq 1 ]; then
+            echo "Error: Coverage below 85%: ${COVERAGE_PERCENT}%"
+            exit 1
+          fi
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage-report-ruby${{ matrix.ruby-version }}-${{ matrix.db }}
+          path: coverage/
+          retention-days: 30
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v6
@@ -81,3 +142,19 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
+
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Run performance benchmarks
+        run: bin/benchmark

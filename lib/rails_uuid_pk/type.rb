@@ -70,13 +70,33 @@ module RailsUuidPk
         cast(value)
       end
 
+      # Casts a value for database storage (ActiveRecord compatibility).
+      #
+      # @param value [Object] The value to cast for database storage
+      # @return [String, nil] The cast value or nil
+      def type_cast_for_database(value)
+        serialize(value)
+      end
+
+      # Casts a value from the database (ActiveRecord compatibility).
+      #
+      # @param value [Object] The value from the database
+      # @return [String, nil] The cast value or nil
+      def type_cast_from_database(value)
+        deserialize(value)
+      end
+
       # Checks if two values are different for change detection.
+      #
+      # Compares the original values to determine if they represent different data,
+      # which is used by ActiveRecord for dirty tracking.
       #
       # @param raw_old_value [Object] The old raw value from the database
       # @param new_value [Object] The new value being compared
       # @return [Boolean] true if the values are different
       def changed_in_place?(raw_old_value, new_value)
-        cast(raw_old_value) != cast(new_value)
+        # Compare original values for change detection
+        raw_old_value != new_value
       end
 
       private
@@ -86,6 +106,7 @@ module RailsUuidPk
       # @param value [String] The string to validate
       # @return [Boolean] true if the string matches UUID format
       def valid?(value)
+        return false if value.nil?
         value.match?(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
       end
 

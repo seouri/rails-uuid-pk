@@ -25,4 +25,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pg", "~> 1.6.3"
   spec.add_development_dependency "sqlite3", "~> 2.9.0"
   spec.add_development_dependency "yard", "~> 0.9"
+  spec.add_development_dependency "bundler-audit", "~> 0.9"
+  spec.add_development_dependency "simplecov", "~> 0.22"
+  spec.add_development_dependency "benchmark-ips", "~> 2.14"
+  spec.add_development_dependency "benchmark", "~> 0.5"
 end

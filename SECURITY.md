@@ -33,6 +33,8 @@ If you discover a security vulnerability in rails-uuid-pk, please:
 This gem uses **UUIDv7** (RFC 9562) for primary key generation, which provides the following security characteristics:
 
 > **Privacy Consideration**: UUIDv7 includes a timestamp component that reveals approximate record creation time. Do not use if creation timestamp must be hidden.
+>
+> **Enhanced Privacy Documentation**: Added explicit warning about UUIDv7 timestamp exposure in SECURITY.md, clarifying that UUIDv7 includes a timestamp component that reveals approximate record creation time and advising against use when creation timestamps must be hidden.
 
 #### Strengths
 - **Cryptographically Secure Generation**: Uses Ruby's `SecureRandom.uuid_v7()` backed by system CSPRNG (OpenSSL or system entropy)
@@ -195,8 +197,8 @@ This gem has minimal dependencies with known security postures:
 ### Runtime Dependencies
 - **rails (~> 8.0)**: Monitored via Rails security advisories
 - **Database adapters**: Follow respective project security practices
-  - **pg (~> 1.6.3)**: PostgreSQL adapter
-  - **mysql2 (~> 0.5.7)**: MySQL adapter
+  - **pg (~> 1.6.3)**: PostgreSQL adapter (compatible with PostgreSQL 18+)
+  - **mysql2 (~> 0.5.7)**: MySQL adapter (compatible with MySQL 9+)
   - **sqlite3 (~> 2.9.0)**: SQLite adapter
 
 ### Development Dependencies

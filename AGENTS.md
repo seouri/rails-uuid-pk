@@ -27,7 +27,10 @@ This guide helps LLM coding agents understand and contribute to the rails-uuid-p
 1. Clone the repository
 2. Run `bundle install`
 3. Use `./bin/test` to run the full test suite
-4. Use `./bin/rubocop` for code quality checks
+4. Use `./bin/coverage` to run tests with coverage reporting
+5. Use `./bin/benchmark` to run performance benchmarks
+6. Use `./bin/rubocop` for code quality checks
+7. Use `bundle exec bundler-audit` to check for known vulnerabilities
 
 ### Terminal-based AI Agents
 
@@ -88,8 +91,10 @@ rails-uuid-pk/
 │   ├── rails_uuid_pk_test.rb     # Main test file
 │   └── test_helper.rb            # Test configuration
 ├── bin/                          # Executable scripts
-│   ├── test                      # Test runner
-│   └── rubocop                   # Code quality checker
+│   ├── benchmark                 # Performance benchmarking
+│   ├── coverage                  # Test coverage reporting
+│   ├── rubocop                   # Code quality checker
+│   └── test                      # Test runner
 ├── .github/workflows/ci.yml      # CI configuration
 ├── rails_uuid_pk.gemspec         # Gem specification
 ├── ARCHITECTURE.md               # Architectural decisions and design rationale
@@ -125,6 +130,8 @@ rails-uuid-pk/
    - Integrates with Rails logger for production debugging and monitoring
    - Debug logging for UUID assignment, migration helpers, and adapter registration
    - Production-ready logging with configurable levels and log aggregation support
+   - Structured logging with `[RailsUuidPk]` prefix for easy filtering
+   - Compatible with existing Rails logging and monitoring systems (Datadog, CloudWatch, etc.)
 
 ### Key Design Decisions
 
@@ -150,6 +157,15 @@ rails-uuid-pk/
 DB=sqlite ./bin/test
 DB=postgres ./bin/test
 DB=mysql ./bin/test
+
+# Specific test file
+./bin/test test/uuid/generation_test.rb
+
+# Specific test file with specific database
+DB=sqlite ./bin/test test/uuid/type_test.rb
+
+# Multiple specific test files
+./bin/test test/uuid/generation_test.rb test/uuid/type_test.rb
 
 # Rails test suite (from test/dummy/)
 cd test/dummy && rails test

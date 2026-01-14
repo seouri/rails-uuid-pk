@@ -7,6 +7,7 @@ Automatically use UUID v7 for **all primary keys** in Rails applications. Works 
 [![Gem Version](https://img.shields.io/gem/v/rails-uuid-pk.svg?style=flat-square)](https://rubygems.org/gems/rails-uuid-pk)
 [![Ruby](https://img.shields.io/badge/ruby-≥3.3-red.svg?style=flat-square)](https://www.ruby-lang.org)
 [![Rails](https://img.shields.io/badge/rails-≥8.1-9650f9.svg?style=flat-square)](https://rubyonrails.org)
+[![CI](https://img.shields.io/github/actions/workflow/status/seouri/rails-uuid-pk/ci.yml?branch=main&style=flat-square)](https://github.com/seouri/rails-uuid-pk/actions)
 
 ## Why this gem?
 
@@ -175,10 +176,25 @@ The project includes a comprehensive test suite that runs against SQLite, Postgr
 # Run all tests (SQLite + PostgreSQL + MySQL)
 ./bin/test
 
+# Run tests with coverage reporting
+./bin/coverage
+
+# Run performance benchmarks
+./bin/benchmark
+
 # Run tests for specific database
 DB=sqlite ./bin/test      # SQLite only
 DB=postgres ./bin/test    # PostgreSQL only
 DB=mysql ./bin/test       # MySQL only
+
+# Run specific test file
+./bin/test test/uuid/generation_test.rb
+
+# Run specific test file with specific database
+DB=sqlite ./bin/test test/uuid/type_test.rb
+
+# Run multiple specific test files
+./bin/test test/uuid/generation_test.rb test/uuid/type_test.rb
 ```
 
 ### Code Quality

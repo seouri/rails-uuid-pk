@@ -18,6 +18,7 @@ require "rails/test_unit/railtie"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Load the gem after SimpleCov is set up (when COVERAGE=true)
 require "rails_uuid_pk"
 
 module Dummy
