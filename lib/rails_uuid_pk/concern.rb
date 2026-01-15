@@ -20,14 +20,49 @@ module RailsUuidPk
   #   user = User.new(id: "custom-uuid")
   #   user.save # Uses the custom UUID, not auto-generated
   #
-  # @note UUIDs are only assigned when id is nil to allow manual ID assignment
+  # @example Opting out of UUID primary keys
+  #   class LegacyModel < ApplicationRecord
+  #     use_integer_primary_key
+  #     # Uses integer auto-incrementing primary key instead of UUIDv7
+  #   end
+  #
+  # @note UUIDs are only assigned when id is nil and the model uses UUID primary keys
   # @see RailsUuidPk::Railtie
   # @see https://www.rfc-editor.org/rfc/rfc9562.html RFC 9562 (UUIDv7)
   module HasUuidv7PrimaryKey
     extend ActiveSupport::Concern
 
     included do
-      before_create :assign_uuidv7_if_needed, if: -> { id.nil? }
+      before_create :assign_uuidv7_if_needed, if: -> { id.nil? && self.class.uses_uuid_primary_key? }
+    end
+
+    # Class methods for models using HasUuidv7PrimaryKey.
+    module ClassMethods
+      # Opt out of automatic UUIDv7 primary key generation for this model.
+      #
+      # When called, the model will use Rails' default primary key behavior
+      # (typically integer auto-incrementing) instead of UUIDv7 generation.
+      #
+      # @example
+      #   class LegacyModel < ApplicationRecord
+      #     use_integer_primary_key
+      #   end
+      #
+      # @note Subclasses do NOT inherit this setting. Each class must explicitly opt out.
+      # @return [void]
+      def use_integer_primary_key
+        singleton_class.instance_variable_set(:@uses_integer_primary_key, true)
+      end
+
+      # Check if this model uses UUID primary keys.
+      #
+      # Returns false if the model has opted out via use_integer_primary_key,
+      # true otherwise (default behavior).
+      #
+      # @return [Boolean] true if model uses UUID primary keys, false otherwise
+      def uses_uuid_primary_key?
+        !singleton_class.instance_variable_get(:@uses_integer_primary_key)
+      end
     end
 
     private

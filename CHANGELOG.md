@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
+## [0.11.0] - 2026-01-16
+
+### Added
+- **`use_integer_primary_key` opt-out functionality**: Added ability to opt out of automatic UUIDv7 primary key generation for specific models
+  - New `use_integer_primary_key` class method allows models to use traditional integer auto-incrementing primary keys
+  - **Important**: When opting out, developers must modify the generated migration to change `id: :uuid` to `id: :integer` for the table schema
+  - Migration helpers automatically detect mixed primary key types and set appropriate foreign key types
+  - Comprehensive test coverage for opt-out behavior and mixed primary key scenarios
+  - Full interoperability between UUID and integer primary key models
+  - Updated documentation with opt-out usage examples
+
+### Technical Details
+- Added `ClassMethods` module to `RailsUuidPk::HasUuidv7PrimaryKey` with `use_integer_primary_key` and `uses_uuid_primary_key?` methods
+- Modified callback condition to check `self.class.uses_uuid_primary_key?` for opt-out support
+- Enhanced migration helpers to handle mixed UUID/integer primary key environments
+- Added comprehensive unit tests in `test/uuid/opt_out_test.rb` covering:
+  - Opt-out method functionality and flag setting
+  - Callback skipping for opted-out models
+  - Mixed primary key scenarios with proper foreign key type detection
+  - Inheritance behavior and subclass overrides
+- Added integration tests for mixed primary key scenarios in migration helpers
+- Updated configuration tests to verify opt-out functionality
+
 ## [0.10.0] - 2026-01-15
 
 ### Added

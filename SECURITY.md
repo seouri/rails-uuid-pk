@@ -6,7 +6,8 @@ We take security seriously and actively maintain this gem. The following version
 
 | Version | Supported          | Security Support Until |
 | ------- | ------------------ | ---------------------- |
-| 0.10.x  | :white_check_mark: | Ongoing                |
+| 0.11.x  | :white_check_mark: | Ongoing                |
+| 0.10.x  | :white_check_mark: | 6 months from 0.11.0  |
 | 0.9.x   | :white_check_mark: | 6 months from 0.10.0  |
 | < 0.9   | :x:                | None                   |
 

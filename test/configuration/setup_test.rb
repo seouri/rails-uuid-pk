@@ -126,4 +126,42 @@ class ConfigurationSetupTest < ActiveSupport::TestCase
       end
     end
   end
+
+  test "opt-out models are properly excluded from UUID generation" do
+    # Create a test table with integer primary key
+    ActiveRecord::Base.connection.create_table :opt_out_test_models, id: :integer do |t|
+      t.string :name
+    end
+
+    # Create a test model that opts out
+    class OptOutTestModel < ApplicationRecord
+      self.table_name = "opt_out_test_models"
+      use_integer_primary_key
+    end
+
+    # Verify the model has opted out
+    assert_not OptOutTestModel.uses_uuid_primary_key?,
+               "OptOutTestModel should not use UUID primary keys"
+
+    # Create a record and verify it gets an integer primary key
+    record = OptOutTestModel.create!(name: "Opt-out Test")
+    assert_kind_of Integer, record.id,
+                   "Opt-out model should get integer primary key"
+    assert record.id > 0,
+           "Integer primary key should be positive"
+
+    # Clean up
+    ActiveRecord::Base.connection.drop_table :opt_out_test_models, if_exists: true
+  end
+
+  test "default models continue to use UUID primary keys" do
+    # Regular models should still use UUIDs by default
+    assert User.uses_uuid_primary_key?,
+           "Default models should use UUID primary keys"
+
+    # Create a record and verify it gets a UUID
+    record = User.create!(name: "Default UUID Test")
+    assert_match(/\A[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/i, record.id,
+                 "Default model should get UUIDv7 primary key")
+  end
 end

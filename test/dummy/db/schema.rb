@@ -10,7 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_09_225213) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_15_214839) do
+  create_table "external_refs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["user_id"], name: "index_external_refs_on_user_id"
+  end
+
   create_table "referers", id: :uuid, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -25,5 +33,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_09_225213) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "external_refs", "users"
   add_foreign_key "referers", "users"
 end

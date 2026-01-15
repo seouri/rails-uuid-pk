@@ -274,6 +274,75 @@ end
 - **Extensible**: Easy to add new database support
 - **Testable**: Each adapter can be tested independently
 
+### Decision 5: Opt-out Mechanism for Selective UUID Generation
+
+#### Chosen: Class-Level Opt-out with Migration Helper Integration
+```ruby
+# lib/rails_uuid_pk/concern.rb
+module RailsUuidPk
+  module HasUuidv7PrimaryKey
+    extend ActiveSupport::Concern
+
+    module ClassMethods
+      def use_integer_primary_key
+        @uses_integer_primary_key = true
+      end
+
+      def uses_uuid_primary_key?
+        !@uses_integer_primary_key
+      end
+    end
+
+    included do
+      before_create :assign_uuidv7_if_needed, if: -> { id.nil? && self.class.uses_uuid_primary_key? }
+    end
+  end
+end
+```
+
+#### Migration Helper Integration
+```ruby
+# lib/rails_uuid_pk/migration_helpers.rb
+def references(*args, **options)
+  ref_name = args.first
+  ref_table = options.delete(:to_table) || ref_name.to_s.pluralize
+
+  # Automatic type detection for mixed PK scenarios
+  if uuid_primary_key?(ref_table)
+    options[:type] = :uuid
+  end
+
+  super(*args, **options)
+end
+```
+
+#### Migration Schema Updates
+When opting out of UUID primary keys, developers must also modify the generated migration:
+
+```ruby
+# Generated migration (modify this line)
+create_table :legacy_models, id: :uuid do |t|  # Change :uuid to :integer
+  t.string :name
+end
+
+# After modification
+create_table :legacy_models, id: :integer do |t|  # Now uses integer primary keys
+  t.string :name
+end
+```
+
+#### Benefits
+- **Selective Control**: Individual models can opt out while maintaining overall UUID usage
+- **Migration Intelligence**: Automatic foreign key type detection for mixed scenarios
+- **Zero Breaking Changes**: Existing applications continue to work unchanged
+- **Clean API**: Simple declarative syntax for opting out
+- **Inheritance Aware**: Subclasses must explicitly opt out (no automatic inheritance)
+
+#### Trade-offs
+- **Inheritance Behavior**: Opt-out is not inherited - each model must explicitly declare preference
+- **Migration Complexity**: Foreign key type detection becomes more complex in mixed environments
+- **Testing Requirements**: Mixed scenarios require additional test coverage
+
 ## Migration Performance Implications
 
 ### Schema Inspection Caching

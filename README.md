@@ -27,7 +27,7 @@ Automatically use UUID v7 for **all primary keys** in Rails applications. Works 
 Add to your `Gemfile`:
 
 ```ruby
-gem "rails-uuid-pk", "~> 0.10"
+gem "rails-uuid-pk", "~> 0.11"
 ```
 
 Then run:
@@ -53,6 +53,47 @@ That's it! No changes needed in your models.
 # This works out of the box:
 User.create!(name: "Alice")  # ← id is automatically a proper UUIDv7
 ```
+
+### Opting Out of UUID Primary Keys
+
+If you need traditional integer auto-incrementing primary keys for specific models, you can opt out:
+
+```ruby
+class LegacyModel < ApplicationRecord
+  use_integer_primary_key
+  # Uses integer auto-incrementing primary key instead of UUIDv7
+end
+
+# Usage
+legacy = LegacyModel.create!(name: "Old Data")
+legacy.id # => 1 (integer, not UUID)
+```
+
+**Important**: When opting out of UUID primary keys, you must also modify the generated migration to use `id: :integer`:
+
+```ruby
+# db/migrate/20240101000000_create_legacy_models.rb
+class CreateLegacyModels < ActiveRecord::Migration[8.1]
+  def change
+    create_table :legacy_models, id: :integer do |t|  # Change :uuid to :integer
+      t.string :name
+      t.timestamps
+    end
+  end
+end
+```
+
+**Migration helpers automatically detect** primary key types and set appropriate foreign key types:
+
+```ruby
+# Rails will automatically use integer foreign keys when referencing LegacyModel
+create_table :related_records do |t|
+  t.references :legacy_model, null: false  # → integer foreign key
+  t.references :user, null: false          # → UUID foreign key (User uses UUIDs)
+end
+```
+
+This enables seamless interoperability between models using UUID primary keys and those using integer primary keys.
 
 ## Important Compatibility Notes
 
@@ -214,7 +255,7 @@ DB=sqlite ./bin/test test/uuid/type_test.rb
 gem build rails_uuid_pk.gemspec
 
 # Install locally for testing
-gem install rails-uuid-pk-0.10.0.gem
+gem install rails-uuid-pk-0.11.0.gem
 ```
 
 ### Database Setup

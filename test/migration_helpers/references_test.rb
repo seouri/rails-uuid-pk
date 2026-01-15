@@ -609,4 +609,213 @@ class MigrationHelpersReferencesTest < ActiveSupport::TestCase
 
   # Note: Complex unit tests for internal methods removed due to mocking complexity.
   # The functionality is thoroughly tested by the integration tests above.
+
+  # Tests for mixed primary key scenarios (UUID and integer models)
+
+  test "references detects mixed primary key types correctly" do
+    # Create tables with different primary key types
+    uuid_parent_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :mixed_uuid_parents, id: :uuid do |t|
+          t.string :name
+        end
+      end
+    end
+
+    int_parent_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :mixed_int_parents do |t|
+          t.string :name
+        end
+      end
+    end
+
+    uuid_parent_migration.migrate(:up)
+    int_parent_migration.migrate(:up)
+
+    # Create referencing table with mixed foreign keys
+    mixed_ref_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :mixed_references do |t|
+          t.references :mixed_uuid_parent, null: false  # Should be UUID
+          t.references :mixed_int_parent, null: false   # Should be integer
+          t.string :description
+        end
+      end
+    end
+
+    mixed_ref_migration.migrate(:up)
+
+    # Verify FK types are detected correctly
+    columns = ActiveRecord::Base.connection.columns(:mixed_references)
+    uuid_fk = columns.find { |c| c.name == "mixed_uuid_parent_id" }
+    int_fk = columns.find { |c| c.name == "mixed_int_parent_id" }
+
+    assert_equal :uuid, uuid_fk.type, "Reference to UUID table should be UUID type"
+    assert_equal :integer, int_fk.type, "Reference to integer table should be integer type"
+
+    # Clean up
+    mixed_ref_migration.migrate(:down)
+    int_parent_migration.migrate(:down)
+    uuid_parent_migration.migrate(:down)
+  end
+
+  test "polymorphic references handle mixed primary key scenarios" do
+    # Create mixed parent tables (some UUID, some integer)
+    uuid_parent_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :poly_mixed_uuid_parents, id: :uuid do |t|
+          t.string :name
+        end
+      end
+    end
+
+    int_parent_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :poly_mixed_int_parents do |t|
+          t.string :name
+        end
+      end
+    end
+
+    uuid_parent_migration.migrate(:up)
+    int_parent_migration.migrate(:up)
+
+    # Create polymorphic table - should use UUID since UUID parents exist
+    poly_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :poly_mixed_models do |t|
+          t.string :content
+          t.references :resource, polymorphic: true
+        end
+      end
+    end
+
+    poly_migration.migrate(:up)
+
+    # Should use UUID type for polymorphic FK since UUID parents exist
+    columns = ActiveRecord::Base.connection.columns(:poly_mixed_models)
+    fk_column = columns.find { |c| c.name == "resource_id" }
+    assert_equal :uuid, fk_column.type, "Polymorphic FK should be UUID when UUID parents exist"
+
+    # Clean up
+    poly_migration.migrate(:down)
+    int_parent_migration.migrate(:down)
+    uuid_parent_migration.migrate(:down)
+  end
+
+  test "add_reference works with mixed primary key types" do
+    # Create mixed parent tables
+    uuid_parent_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :add_ref_mixed2_uuid_parents, id: :uuid do |t|
+          t.string :name
+        end
+      end
+    end
+
+    int_parent_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :add_ref_mixed2_int_parents do |t|
+          t.string :name
+        end
+      end
+    end
+
+    uuid_parent_migration.migrate(:up)
+    int_parent_migration.migrate(:up)
+
+    # Create base table
+    base_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :add_ref_mixed2_base do |t|
+          t.string :description
+        end
+      end
+    end
+
+    base_migration.migrate(:up)
+
+    # Add references to mixed tables
+    add_ref_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        add_reference :add_ref_mixed2_base, :add_ref_mixed2_uuid_parent, null: false
+        add_reference :add_ref_mixed2_base, :add_ref_mixed2_int_parent, null: false
+      end
+    end
+
+    add_ref_migration.migrate(:up)
+
+    # Verify FK types
+    columns = ActiveRecord::Base.connection.columns(:add_ref_mixed2_base)
+    uuid_fk = columns.find { |c| c.name == "add_ref_mixed2_uuid_parent_id" }
+    int_fk = columns.find { |c| c.name == "add_ref_mixed2_int_parent_id" }
+
+    assert_equal :uuid, uuid_fk.type, "add_reference to UUID table should be UUID type"
+    assert_equal :integer, int_fk.type, "add_reference to integer table should be integer type"
+
+    # Clean up
+    add_ref_migration.migrate(:down)
+    base_migration.migrate(:down)
+    int_parent_migration.migrate(:down)
+    uuid_parent_migration.migrate(:down)
+  end
+
+  test "migration helpers cache works correctly with mixed primary key tables" do
+    # Create mixed parent tables
+    uuid_parent_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :cache_mixed_uuid_parents, id: :uuid do |t|
+          t.string :name
+        end
+      end
+    end
+
+    int_parent_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :cache_mixed_int_parents do |t|
+          t.string :name
+        end
+      end
+    end
+
+    uuid_parent_migration.migrate(:up)
+    int_parent_migration.migrate(:up)
+
+    # Create table with multiple references to the same tables (testing cache)
+    cache_test_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :cache_mixed_test do |t|
+          # Multiple references to same UUID table
+          t.references :cache_mixed_uuid_parent, null: false
+          t.references :uuid_alias, to_table: :cache_mixed_uuid_parents, null: false
+
+          # Multiple references to same integer table
+          t.references :cache_mixed_int_parent, null: false
+          t.references :int_alias, to_table: :cache_mixed_int_parents, null: false
+
+          t.string :description
+        end
+      end
+    end
+
+    cache_test_migration.migrate(:up)
+
+    # Verify all FK types are correct (cache should work consistently)
+    columns = ActiveRecord::Base.connection.columns(:cache_mixed_test)
+    uuid_fk1 = columns.find { |c| c.name == "cache_mixed_uuid_parent_id" }
+    uuid_fk2 = columns.find { |c| c.name == "uuid_alias_id" }
+    int_fk1 = columns.find { |c| c.name == "cache_mixed_int_parent_id" }
+    int_fk2 = columns.find { |c| c.name == "int_alias_id" }
+
+    assert_equal :uuid, uuid_fk1.type, "First UUID reference should be UUID type"
+    assert_equal :uuid, uuid_fk2.type, "Second UUID reference should be UUID type"
+    assert_equal :integer, int_fk1.type, "First integer reference should be integer type"
+    assert_equal :integer, int_fk2.type, "Second integer reference should be integer type"
+
+    # Clean up
+    cache_test_migration.migrate(:down)
+    int_parent_migration.migrate(:down)
+    uuid_parent_migration.migrate(:down)
+  end
 end
