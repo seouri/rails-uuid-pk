@@ -404,6 +404,29 @@ class MigrationHelpersReferencesTest < ActiveSupport::TestCase
     migration.migrate(:down)
   end
 
+  test "t.uuid method in migrations creates UUID column" do
+    # Test that t.uuid creates a UUID column
+    migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :test_uuid_column_models do |t|
+          t.uuid :custom_uuid
+        end
+      end
+    end
+
+    migration.migrate(:up)
+
+    begin
+      # Check that the created table has a UUID column
+      columns = ActiveRecord::Base.connection.columns(:test_uuid_column_models)
+      uuid_column = columns.find { |c| c.name == "custom_uuid" }
+      assert_equal :uuid, uuid_column.type, "t.uuid should create a column with UUID type"
+    ensure
+      # Clean up
+      migration.migrate(:down)
+    end
+  end
+
   # Additional tests for migration helpers coverage gaps
 
   test "application_uses_uuid_primary_keys? detects Rails generator config" do

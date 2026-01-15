@@ -140,4 +140,59 @@ class SqliteAdapterTest < ActiveSupport::TestCase
     assert_not_nil uuid_type
     assert_equal :uuid, uuid_type.type
   end
+
+  test "SQLite adapter valid_type? recognized :uuid" do
+    skip "Only runs on SQLite" unless ActiveRecord::Base.connection.adapter_name == "SQLite"
+    assert ActiveRecord::Base.connection.valid_type?(:uuid)
+  end
+
+  test "SQLite adapter type_to_dump returns :uuid for UUID columns" do
+    skip "Only runs on SQLite" unless ActiveRecord::Base.connection.adapter_name == "SQLite"
+
+    migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :test_sqlite_dump_models, id: :uuid do |t|
+          t.uuid :other_uuid
+        end
+      end
+    end
+
+    migration.migrate(:up)
+
+    begin
+      columns = ActiveRecord::Base.connection.columns(:test_sqlite_dump_models)
+      id_column = columns.find { |c| c.name == "id" }
+      other_column = columns.find { |c| c.name == "other_uuid" }
+
+      assert_equal [ :uuid, {} ], ActiveRecord::Base.connection.type_to_dump(id_column)
+      assert_equal [ :uuid, {} ], ActiveRecord::Base.connection.type_to_dump(other_column)
+    ensure
+      migration.migrate(:down)
+    end
+  end
+
+  test "SQLite schema dumping uses :uuid type" do
+    skip "Only runs on SQLite" unless ActiveRecord::Base.connection.adapter_name == "SQLite"
+
+    migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :test_sqlite_schema_models, id: :uuid do |t|
+          t.uuid :some_id
+        end
+      end
+    end
+
+    migration.migrate(:up)
+
+    begin
+      schema_content = StringIO.new
+      ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection_pool, schema_content)
+      schema_string = schema_content.string
+
+      assert_match(/create_table "test_sqlite_schema_models", id: :uuid/, schema_string)
+      assert_match(/t\.uuid "some_id"/, schema_string)
+    ensure
+      migration.migrate(:down)
+    end
+  end
 end

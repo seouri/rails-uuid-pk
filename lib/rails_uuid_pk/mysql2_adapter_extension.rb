@@ -25,6 +25,17 @@ module RailsUuidPk
       )
     end
 
+    # Checks if a type is valid for this adapter.
+    #
+    # Overrides ActiveRecord's valid_type? to recognize the custom UUID type.
+    #
+    # @param type [Symbol] The type to check
+    # @return [Boolean] true if the type is valid
+    def valid_type?(type)
+      return true if type == :uuid
+      super
+    end
+
     # Registers UUID type handlers in the adapter's type map.
     #
     # @param m [ActiveRecord::ConnectionAdapters::AbstractAdapter::TypeMap] The type map to register with
@@ -50,6 +61,17 @@ module RailsUuidPk
     def configure_connection
       super
       register_uuid_types
+    end
+
+    # Overrides type dumping to properly handle UUID columns.
+    #
+    # @param column [ActiveRecord::ConnectionAdapters::Column] The column to dump
+    # @return [Array] The type and options for the schema dump
+    def type_to_dump(column)
+      if column.type == :uuid
+        return [ :uuid, {} ]
+      end
+      super
     end
   end
 end

@@ -162,6 +162,17 @@ module RailsUuidPk
       # Alias for add_reference method (ActiveRecord compatibility)
       alias_method :add_belongs_to, :add_reference
 
+      # Defines a UUID column in a table.
+      #
+      # @param args [Array] Arguments passed to the column method
+      # @param options [Hash] Options passed to the column method
+      # @return [void]
+      def uuid(*args, **options)
+        if respond_to?(:column)
+          column(*args, :uuid, **options)
+        end
+      end
+
       private
 
       # Checks if a table uses UUID primary keys.

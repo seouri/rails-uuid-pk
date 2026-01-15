@@ -5,10 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
-## [0.10.0] - 2026-01-15
+## [0.10.0] - 2026-01-16
+
+### Added
+- **Migration Method `t.uuid`**: Added support for explicit `t.uuid` column definition in migrations for SQLite and MySQL, ensuring consistency with schema dumping and loading
 
 ### Fixed
 - **Documentation URI**: Corrected documentation URI in gemspec to use proper RubyDoc.info format
+- **Schema Dumping for SQLite/MySQL**: Fixed "Unknown type" errors during `db:schema:dump` and `NoMethodError` during schema loading by implementing proper type registration and dumper overrides for non-native UUID adapters
 
 ### Documentation
 - **Performance Claims**: Corrected UUID generation throughput from ~10,000 to ~800,000 UUIDs/second in README.md and PERFORMANCE.md to reflect actual benchmark results

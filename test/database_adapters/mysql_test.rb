@@ -146,6 +146,36 @@ class MysqlAdapterTest < ActiveSupport::TestCase
     assert_equal "MySQL User", found_user.name
   end
 
+  test "MySQL adapter valid_type? recognized :uuid" do
+    skip "MySQL not available" unless ActiveRecord::Base.connection.adapter_name == "MySQL"
+    assert ActiveRecord::Base.connection.valid_type?(:uuid)
+  end
+
+  test "MySQL adapter type_to_dump returns :uuid for UUID columns" do
+    skip "MySQL not available" unless ActiveRecord::Base.connection.adapter_name == "MySQL"
+
+    migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :test_mysql_dump_models, id: :uuid do |t|
+          t.uuid :other_uuid
+        end
+      end
+    end
+
+    migration.migrate(:up)
+
+    begin
+      columns = ActiveRecord::Base.connection.columns(:test_mysql_dump_models)
+      id_column = columns.find { |c| c.name == "id" }
+      other_column = columns.find { |c| c.name == "other_uuid" }
+
+      assert_equal [ :uuid, {} ], ActiveRecord::Base.connection.type_to_dump(id_column)
+      assert_equal [ :uuid, {} ], ActiveRecord::Base.connection.type_to_dump(other_column)
+    ensure
+      migration.migrate(:down)
+    end
+  end
+
   test "MySQL schema dumping with UUID types" do
     skip "MySQL not available" unless ActiveRecord::Base.connection.adapter_name == "MySQL"
     # Test that schema dumping works correctly with MySQL UUID columns
@@ -154,25 +184,27 @@ class MysqlAdapterTest < ActiveSupport::TestCase
       def change
         create_table :test_mysql_schema_models, id: :uuid do |t|
           t.string :name
-          t.references :parent, type: :uuid
+          t.uuid :other_id
         end
       end
     end
 
     schema_migration.migrate(:up)
 
-    # Test schema dumping (this should not raise errors)
-    schema_content = StringIO.new
-    ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, schema_content)
-    schema_string = schema_content.string
+    begin
+      # Test schema dumping (this should not raise errors)
+      schema_content = StringIO.new
+      ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection_pool, schema_content)
+      schema_string = schema_content.string
 
-    # Should contain the table definition
-    assert_match(/create_table "test_mysql_schema_models"/, schema_string)
-    # Should properly handle UUID columns (they appear as string in schema due to our type override)
-    assert_match(/t\.string "id"/, schema_string)
-
-    # Clean up
-    schema_migration.migrate(:down)
+      # Should contain the table definition
+      assert_match(/create_table "test_mysql_schema_models", id: :uuid/, schema_string)
+      # Should properly handle UUID columns
+      assert_match(/t\.uuid "other_id"/, schema_string)
+    ensure
+      # Clean up
+      schema_migration.migrate(:down)
+    end
   end
 
   test "MySQL UUID performance - bulk insertion" do
