@@ -39,8 +39,12 @@ module RailsUuidPk
     private
 
     def assign_uuidv7_if_needed
+      # Skip if id was already set (manual set, bulk insert with ids, etc)
       return if id.present?
-      self.id = SecureRandom.uuid_v7
+
+      uuid = SecureRandom.uuid_v7
+      RailsUuidPk.log(:debug, "Assigned UUIDv7 #{uuid} to #{self.class.name}")
+      self.id = uuid
     end
   end
 end
@@ -80,20 +84,51 @@ end
 
 ### 2. Database Adapter Extensions
 
-#### PostgreSQL (`pg` gem integration)
-- Native UUID type support (16 bytes)
+#### PostgreSQL (Native Support)
+- Uses PostgreSQL's native UUID type support (16 bytes)
+- No adapter extension needed - Rails handles UUID types natively
 - Full database function compatibility
 - Optimized for PostgreSQL 18's enhanced UUID handling
 
 #### MySQL (`mysql2` gem integration)
-- VARCHAR(36) storage for UUIDs
-- Custom type mapping for ActiveRecord
-- Compatible with MySQL 9 string handling and performance optimizations
+```ruby
+# lib/rails_uuid_pk/mysql2_adapter_extension.rb
+module RailsUuidPk
+  module Mysql2AdapterExtension
+    def native_database_types
+      super.merge(
+        uuid: { name: "varchar", limit: 36 }
+      )
+    end
+
+    def register_uuid_types(m = type_map)
+      RailsUuidPk.log(:debug, "Registering UUID types on #{m.class}")
+      m.register_type(/varchar\(36\)/i) { RailsUuidPk::Type::Uuid.new }
+      m.register_type("uuid") { RailsUuidPk::Type::Uuid.new }
+    end
+  end
+end
+```
 
 #### SQLite (`sqlite3` gem integration)
-- VARCHAR(36) storage for UUIDs
-- Custom type mapping for ActiveRecord
-- Optimized for development and testing
+```ruby
+# lib/rails_uuid_pk/sqlite3_adapter_extension.rb
+module RailsUuidPk
+  module Sqlite3AdapterExtension
+    def native_database_types
+      super.merge(
+        uuid: { name: "varchar", limit: 36 }
+      )
+    end
+
+    def register_uuid_types(m = type_map)
+      RailsUuidPk.log(:debug, "Registering UUID types on #{m.class}")
+      m.register_type(/varchar\(36\)/i) { RailsUuidPk::Type::Uuid.new }
+      m.register_type("uuid") { RailsUuidPk::Type::Uuid.new }
+    end
+  end
+end
+```
 
 ## Key Architectural Decisions
 
@@ -199,22 +234,35 @@ end
 
 ### Decision 4: Database Adapter Extension Pattern
 
-#### Chosen: Individual Adapter Extensions
-```ruby
-# lib/rails_uuid_pk/postgresql_adapter_extension.rb
-module RailsUuidPk
-  module PostgreSQLAdapterExtension
-    def native_database_types
-      super.merge(uuid: { name: "uuid" })
-    end
-  end
-end
+#### Chosen: Selective Adapter Extensions
+**PostgreSQL**: No extension needed - uses Rails' native UUID type support
+**MySQL & SQLite**: Custom extensions for VARCHAR(36) UUID storage
 
+```ruby
+# MySQL extension - provides VARCHAR(36) type mapping
 # lib/rails_uuid_pk/mysql2_adapter_extension.rb
 module RailsUuidPk
   module Mysql2AdapterExtension
     def native_database_types
       super.merge(uuid: { name: "varchar", limit: 36 })
+    end
+
+    def register_uuid_types(m = type_map)
+      m.register_type(/varchar\(36\)/i) { RailsUuidPk::Type::Uuid.new }
+    end
+  end
+end
+
+# SQLite extension - provides VARCHAR(36) type mapping
+# lib/rails_uuid_pk/sqlite3_adapter_extension.rb
+module RailsUuidPk
+  module Sqlite3AdapterExtension
+    def native_database_types
+      super.merge(uuid: { name: "varchar", limit: 36 })
+    end
+
+    def register_uuid_types(m = type_map)
+      m.register_type(/varchar\(36\)/i) { RailsUuidPk::Type::Uuid.new }
     end
   end
 end

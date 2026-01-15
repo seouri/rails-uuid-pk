@@ -94,7 +94,7 @@ end
 
 ## Performance Overview
 
-**Generation**: ~10,000 UUIDs/second with cryptographic security and monotonic ordering
+**Generation**: ~800,000 UUIDs/second with cryptographic security and monotonic ordering
 
 | Database | Storage | Index Performance | Notes |
 |----------|---------|-------------------|--------|

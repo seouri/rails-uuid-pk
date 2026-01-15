@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 ### Fixed
 - **Documentation URI**: Corrected documentation URI in gemspec to use proper RubyDoc.info format
 
+### Documentation
+- **Performance Claims**: Corrected UUID generation throughput from ~10,000 to ~800,000 UUIDs/second in README.md and PERFORMANCE.md to reflect actual benchmark results
+- **Architecture Documentation**: Updated ARCHITECTURE.md with accurate database adapter descriptions, corrected PostgreSQL native support vs extension usage, and added proper code examples for MySQL/SQLite extensions
+- **Agent Development Guide**: Updated AGENTS.md with current project structure, test organization, code architecture details, and Rails version requirements
+- **Security Documentation**: Updated SECURITY.md supported versions table to reflect current version 0.10.0 as actively supported
+
 ## [0.9.0] - 2026-01-14
 
 ### Added

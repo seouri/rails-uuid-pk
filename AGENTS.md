@@ -18,7 +18,7 @@ This guide helps LLM coding agents understand and contribute to the rails-uuid-p
 
 ### Prerequisites
 - Ruby 3.3.0+
-- Rails 8.0+
+- Rails 8.1+
 - PostgreSQL (optional, for testing)
 - MySQL 8.0+ (optional, for testing)
 - SQLite3 (included with Ruby)
@@ -83,13 +83,19 @@ rails-uuid-pk/
 │   ├── rails_uuid_pk/            # Core functionality
 │   │   ├── concern.rb            # UUIDv7 generation concern
 │   │   ├── migration_helpers.rb  # Smart foreign key type detection
+│   │   ├── mysql2_adapter_extension.rb  # MySQL adapter UUID support
 │   │   ├── railtie.rb            # Rails integration
+│   │   ├── sqlite3_adapter_extension.rb # SQLite adapter UUID support
+│   │   ├── type.rb               # Custom UUID ActiveRecord type
 │   │   └── version.rb            # Version info
 │   └── generators/               # Rails generators (removed - gem is now zero-config)
 ├── test/                         # Test suite
+│   ├── configuration/            # Configuration and setup tests
+│   ├── database_adapters/        # Database-specific adapter tests
 │   ├── dummy/                    # Rails dummy app for testing
-│   ├── rails_uuid_pk_test.rb     # Main test file
-│   └── test_helper.rb            # Test configuration
+│   ├── migration_helpers/        # Migration helper functionality tests
+│   ├── test_helper.rb            # Test configuration
+│   └── uuid/                     # UUID generation and type tests
 ├── bin/                          # Executable scripts
 │   ├── benchmark                 # Performance benchmarking
 │   ├── coverage                  # Test coverage reporting
@@ -119,13 +125,25 @@ rails-uuid-pk/
    - Handles both regular and polymorphic associations
    - Respects explicitly set user types
 
-3. **Railtie (`lib/rails_uuid_pk/railtie.rb`)**:
+3. **Type (`lib/rails_uuid_pk/type.rb`)**:
+   - `Type::Uuid` custom ActiveRecord type class
+   - Rails version-aware schema dumping (:uuid vs :string)
+   - UUID validation and formatting
+   - Handles serialization/deserialization for database operations
+
+4. **Adapter Extensions**:
+   - **MySQL (`lib/rails_uuid_pk/mysql2_adapter_extension.rb`)**: Extends MySQL2 adapter for UUID support using VARCHAR(36)
+   - **SQLite (`lib/rails_uuid_pk/sqlite3_adapter_extension.rb`)**: Extends SQLite3 adapter for UUID support using VARCHAR(36)
+   - Register custom UUID type handlers in database adapters
+   - Configure type mappings for UUID columns
+
+5. **Railtie (`lib/rails_uuid_pk/railtie.rb`)**:
    - Automatic inclusion in `ActiveRecord::Base`
    - Generator configuration (`primary_key_type: :uuid`)
-   - Database-specific configurations (SQLite schema format, type mappings)
+   - Database-specific configurations and adapter extension registration
    - Includes migration helpers in ActiveRecord migration classes
 
-4. **Logging Framework (`lib/rails_uuid_pk.rb`)**:
+6. **Logging Framework (`lib/rails_uuid_pk.rb`)**:
    - `RailsUuidPk.logger` and `RailsUuidPk.log` methods for structured logging
    - Integrates with Rails logger for production debugging and monitoring
    - Debug logging for UUID assignment, migration helpers, and adapter registration
@@ -143,7 +161,11 @@ rails-uuid-pk/
 ## Testing Strategy
 
 ### Test Organization
-- **Unit tests**: Core functionality in `test/rails_uuid_pk_test.rb`
+- **Unit tests**: Core functionality organized by feature in subdirectories:
+  - `test/configuration/`: Configuration and setup tests
+  - `test/database_adapters/`: Database-specific adapter tests
+  - `test/migration_helpers/`: Migration helper functionality tests
+  - `test/uuid/`: UUID generation and type tests
 - **Integration tests**: Full Rails app testing via dummy app
 - **Database coverage**: Tests run against SQLite, PostgreSQL, and MySQL
 - **CI coverage**: GitHub Actions runs all tests on multiple Ruby versions
@@ -268,7 +290,7 @@ yard doc lib/
 
 #### Adding New Features
 1. Determine if it affects core concern, railtie, or generator
-2. Add tests in `test/rails_uuid_pk_test.rb`
+2. Add tests in the appropriate subdirectory under `test/` (e.g., `test/uuid/`, `test/migration_helpers/`, etc.)
 3. Implement in appropriate module
 4. Update README if user-facing
 
@@ -284,7 +306,7 @@ yard doc lib/
 
 #### Migration Helpers
 1. Modify `lib/rails_uuid_pk/migration_helpers.rb` for foreign key type detection logic
-2. Add comprehensive tests in `test/rails_uuid_pk_test.rb` for all scenarios:
+2. Add comprehensive tests in `test/migration_helpers/` for all scenarios:
    - References to existing UUID tables
    - References to non-UUID tables
    - Polymorphic associations

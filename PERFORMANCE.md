@@ -4,26 +4,29 @@ This document provides detailed performance analysis and optimization guidance f
 
 ## UUID Generation Performance
 
-**Throughput**: ~10,000 UUIDs/second generation rate using Ruby's `SecureRandom.uuid_v7`
+**Throughput**: ~800,000 UUIDs/second generation rate using Ruby's `SecureRandom.uuid_v7`
 - **Cryptographically Secure**: Backed by system CSPRNG (OpenSSL or system entropy)
 - **Monotonic Ordering**: Time-based ordering prevents index fragmentation
 - **Zero Collision Risk**: 128-bit randomness with structured timestamp component
-- **Ruby 4.0 Compatible**: Fixed compatibility issues with SecureRandom and benchmark libraries
+- **Multi-Ruby Compatible**: Works with Ruby 3.3+, 3.4, and 4.0
 
 **Memory Efficient**: Minimal memory overhead for bulk operations
 
 ### Benchmark Results
 
 ```ruby
-# Typical generation performance
+# Current generation performance (Ruby 4.0.0)
 require 'benchmark/ips'
 
 Benchmark.ips do |x|
-  x.report('UUIDv7 generation') { SecureRandom.uuid_v7 }
+  x.report('SecureRandom.uuid_v7') { SecureRandom.uuid_v7 }
   x.compare!
 end
 
-# Results: ~10,000 UUIDs/second on modern hardware
+# Results: ~812,000 UUIDs/second on modern hardware
+# Ruby 4.0.0 (2025-12-25 revision 553f1675f3) +PRISM [aarch64-linux]
+# Calculating -------------------------------------
+# SecureRandom.uuid_v7    811.780k (± 1.8%) i/s    (1.23 μs/i)
 ```
 
 ## Database-Specific Performance
