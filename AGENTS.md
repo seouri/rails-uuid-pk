@@ -218,6 +218,25 @@ cd test/dummy && rails test
 - **Comprehensive tests**: High test coverage
 - **Documentation**: README and inline comments
 
+## Documentation Maintenance
+
+**CRITICAL**: Always keep ALL documentation files up-to-date when making any changes:
+
+- **AGENTS.md** - This development guide for AI agents
+- **ARCHITECTURE.md** - Design decisions and technical rationale
+- **CHANGELOG.md** - Version history and change documentation
+- **DEVELOPMENT.md** - Development setup, testing, and contribution guidelines
+- **PERFORMANCE.md** - Performance analysis and optimization guides
+- **README.md** - User-facing documentation and installation guide
+- **SECURITY.md** - Security considerations and vulnerability reporting
+
+**When making changes:**
+1. Update relevant documentation files immediately after code changes
+2. Ensure cross-references between docs remain accurate
+3. Test documentation links and examples
+4. Update CHANGELOG.md for user-facing changes
+5. Verify README.md remains focused on essential user information
+
 ## Development Workflow
 
 ### For AI Agents
@@ -226,11 +245,11 @@ cd test/dummy && rails test
 2. **Check existing patterns**: Review similar functionality in the codebase
 3. **Write tests first**: Add tests for new features/fixes
 4. **Implement changes**: Follow existing code patterns
-5. **Update YARD documentation**: Add/update YARD comments for any new/modified code
-6. **Run tests**: Ensure all tests pass (`./bin/test`)
-7. **Code quality**: Run RuboCop (`./bin/rubocop`)
-8. **Verify documentation**: Run `yard doc lib/` to ensure 100% documentation coverage
-9. **Update documentation**: README, CHANGELOG if needed
+5. **Update ALL documentation**: Keep AGENTS.md, ARCHITECTURE.md, CHANGELOG.md, DEVELOPMENT.md, PERFORMANCE.md, README.md, SECURITY.md current
+6. **Update YARD documentation**: Add/update YARD comments for any new/modified code
+7. **Run tests**: Ensure all tests pass (`./bin/test`)
+8. **Code quality**: Run RuboCop (`./bin/rubocop`)
+9. **Verify documentation**: Run `yard doc lib/` to ensure 100% documentation coverage
 
 ### YARD Documentation Guidelines
 
