@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 ### Documentation
 - **README Minimization**: Streamlined README.md from ~250 to 112 lines (55% reduction) by moving development content to dedicated DEVELOPMENT.md
 - **DEVELOPMENT.md**: Created comprehensive development guide covering setup, testing, contribution guidelines, and project structure
+- **AGENTS.md Enhancement**: Added prominent "Documentation Maintenance" section with critical instructions for keeping all documentation files (AGENTS.md, ARCHITECTURE.md, CHANGELOG.md, DEVELOPMENT.md, PERFORMANCE.md, README.md, SECURITY.md) up-to-date
 - **Improved Documentation Organization**: Better separation of user-facing and developer-facing content with proper cross-references
 
 ### Technical Details
