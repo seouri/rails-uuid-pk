@@ -46,7 +46,9 @@ module RailsUuidPk
   # @example
   #   RailsUuidPk.logger.info("Custom message")
   def self.logger
-    @logger ||= (defined?(Rails.logger) && Rails.logger) || Logger.new($stdout)
+    @logger ||= ((defined?(Rails.logger) && Rails.logger) || Logger.new($stdout))
+    @logger = Logger.new($stdout) unless @logger.is_a?(Logger)
+    @logger
   end
 
   # Sets the logger instance for this gem.
