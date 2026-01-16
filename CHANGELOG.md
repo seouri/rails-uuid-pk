@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 - Added `ClassMethods` module to `RailsUuidPk::HasUuidv7PrimaryKey` with `use_integer_primary_key` and `uses_uuid_primary_key?` methods
 - Modified callback condition to check `self.class.uses_uuid_primary_key?` for opt-out support
 - Enhanced migration helpers to handle mixed UUID/integer primary key environments
+- **Refactored logger initialization**: Simplified `RailsUuidPk.logger` method from multiple redundant assignments to single `||=` expression for improved readability and maintainability
 - Added comprehensive unit tests in `test/uuid/opt_out_test.rb` covering:
   - Opt-out method functionality and flag setting
   - Callback skipping for opted-out models
