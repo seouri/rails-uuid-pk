@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 - Added integration tests for mixed primary key scenarios in migration helpers
 - Updated configuration tests to verify opt-out functionality
 
+### Fixed
+- **Documentation URI**: Updated documentation URI in gemspec to include version number for proper RubyDoc.info linking
+
 ## [0.10.0] - 2026-01-15
 
 ### Added
