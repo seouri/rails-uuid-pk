@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
   - Full interoperability between UUID and integer primary key models
   - Updated documentation with opt-out usage examples
 
+### Documentation
+- **README Minimization**: Streamlined README.md from ~250 to 112 lines (55% reduction) by moving development content to dedicated DEVELOPMENT.md
+- **DEVELOPMENT.md**: Created comprehensive development guide covering setup, testing, contribution guidelines, and project structure
+- **Improved Documentation Organization**: Better separation of user-facing and developer-facing content with proper cross-references
+
 ### Technical Details
 - Added `ClassMethods` module to `RailsUuidPk::HasUuidv7PrimaryKey` with `use_integer_primary_key` and `uses_uuid_primary_key?` methods
 - Modified callback condition to check `self.class.uses_uuid_primary_key?` for opt-out support
