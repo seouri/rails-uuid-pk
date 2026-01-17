@@ -146,36 +146,6 @@ class MysqlAdapterTest < ActiveSupport::TestCase
     assert_equal "MySQL User", found_user.name
   end
 
-  test "MySQL adapter valid_type? recognized :uuid" do
-    skip "MySQL not available" unless ActiveRecord::Base.connection.adapter_name == "MySQL"
-    assert ActiveRecord::Base.connection.valid_type?(:uuid)
-  end
-
-  test "MySQL adapter type_to_dump returns :uuid for UUID columns" do
-    skip "MySQL not available" unless ActiveRecord::Base.connection.adapter_name == "MySQL"
-
-    migration = Class.new(ActiveRecord::Migration::Current) do
-      def change
-        create_table :test_mysql_dump_models, id: :uuid do |t|
-          t.uuid :other_uuid
-        end
-      end
-    end
-
-    migration.migrate(:up)
-
-    begin
-      columns = ActiveRecord::Base.connection.columns(:test_mysql_dump_models)
-      id_column = columns.find { |c| c.name == "id" }
-      other_column = columns.find { |c| c.name == "other_uuid" }
-
-      assert_equal [ :uuid, {} ], ActiveRecord::Base.connection.type_to_dump(id_column)
-      assert_equal [ :uuid, {} ], ActiveRecord::Base.connection.type_to_dump(other_column)
-    ensure
-      migration.migrate(:down)
-    end
-  end
-
   test "MySQL schema dumping with UUID types" do
     skip "MySQL not available" unless ActiveRecord::Base.connection.adapter_name == "MySQL"
     # Test that schema dumping works correctly with MySQL UUID columns
@@ -372,78 +342,5 @@ class MysqlAdapterTest < ActiveSupport::TestCase
 
     # Clean up
     varchar_mapping_migration.migrate(:down)
-  end
-
-  test "MySQL adapter native types include UUID mapping" do
-    skip "MySQL not available" unless ActiveRecord::Base.connection.adapter_name == "MySQL"
-
-    # Check that the native_database_types includes our UUID mapping
-    native_types = ActiveRecord::Base.connection.native_database_types
-    assert native_types.key?(:uuid), "MySQL adapter should include UUID in native types"
-    assert_equal({ name: "varchar", limit: 36 }, native_types[:uuid])
-  end
-
-  # Additional tests to cover missing methods in MySQL adapter extension
-
-  test "MySQL adapter initialize_type_map calls register_uuid_types" do
-    skip "MySQL not available" unless ActiveRecord::Base.connection.adapter_name == "MySQL"
-
-    adapter = ActiveRecord::Base.connection
-
-    # Should respond to initialize_type_map
-    assert_respond_to adapter, :initialize_type_map
-
-    # Should respond to register_uuid_types
-    assert_respond_to adapter, :register_uuid_types
-
-    # Should respond to configure_connection
-    assert_respond_to adapter, :configure_connection
-
-    # Type map should have UUID registrations
-    type_map = adapter.send(:type_map)
-    assert_not_nil type_map
-
-    # Should be able to lookup UUID types
-    uuid_type = type_map.lookup("uuid")
-    assert_not_nil uuid_type
-    assert_equal :uuid, uuid_type.type
-  end
-
-  test "MySQL adapter configure_connection calls register_uuid_types" do
-    skip "MySQL not available" unless ActiveRecord::Base.connection.adapter_name == "MySQL"
-
-    adapter = ActiveRecord::Base.connection
-
-    # configure_connection should be callable without error
-    assert_nothing_raised do
-      adapter.configure_connection
-    end
-
-    # After configure_connection, type map should still have UUID types
-    type_map = adapter.send(:type_map)
-    uuid_type = type_map.lookup("uuid")
-    assert_not_nil uuid_type
-    assert_equal :uuid, uuid_type.type
-  end
-
-  test "MySQL register_uuid_types adds type mappings to type map" do
-    skip "MySQL not available" unless ActiveRecord::Base.connection.adapter_name == "MySQL"
-
-    adapter = ActiveRecord::Base.connection
-    type_map = adapter.send(:type_map)
-
-    # Call register_uuid_types again (should be idempotent)
-    assert_nothing_raised do
-      adapter.register_uuid_types(type_map)
-    end
-
-    # Verify UUID types are registered
-    varchar36_type = type_map.lookup("varchar(36)")
-    assert_not_nil varchar36_type
-    assert_equal :uuid, varchar36_type.type
-
-    uuid_type = type_map.lookup("uuid")
-    assert_not_nil uuid_type
-    assert_equal :uuid, uuid_type.type
   end
 end

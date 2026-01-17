@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
+## [0.12.0] - 2026-01-17
+
+### Changed
+- **Refactored Database Adapter Extensions**: Eliminated 152 lines of duplicated code (97% similarity) between MySQL and SQLite adapter extensions by introducing a shared `UuidAdapterExtension` module
+  - Created `lib/rails_uuid_pk/uuid_adapter_extension.rb` with common UUID type support functionality
+  - Refactored `Mysql2AdapterExtension` and `Sqlite3AdapterExtension` to include the shared module
+  - Maintained SQLite-specific transaction-aware connection configuration while standardizing all other UUID handling logic
+  - Improved code maintainability and reduced duplication from 156 lines to 99 lines total (37% reduction)
+
+### Technical Details
+- Added shared `UuidAdapterExtension` module containing `native_database_types`, `valid_type?`, `register_uuid_types`, `initialize_type_map`, `configure_connection`, and `type_to_dump` methods
+- Updated `Mysql2AdapterExtension` to include shared module with minimal override for `configure_connection`
+- Updated `Sqlite3AdapterExtension` to include shared module while preserving transaction-aware `configure_connection` implementation
+- Added require statement for new shared module in main library file
+- All existing functionality preserved with identical test suite results (119 tests, 0 failures, 0 errors)
+
 ## [0.11.0] - 2026-01-16
 
 ### Added

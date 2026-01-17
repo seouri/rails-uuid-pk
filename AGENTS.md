@@ -87,6 +87,7 @@ rails-uuid-pk/
 │   │   ├── railtie.rb            # Rails integration
 │   │   ├── sqlite3_adapter_extension.rb # SQLite adapter UUID support
 │   │   ├── type.rb               # Custom UUID ActiveRecord type
+│   │   ├── uuid_adapter_extension.rb    # Shared UUID adapter functionality
 │   │   └── version.rb            # Version info
 │   └── generators/               # Rails generators (removed - gem is now zero-config)
 ├── test/                         # Test suite
@@ -132,6 +133,9 @@ rails-uuid-pk/
    - Handles serialization/deserialization for database operations
 
 4. **Adapter Extensions**:
+   - **Shared UUID Adapter Extension (`lib/rails_uuid_pk/uuid_adapter_extension.rb`)**: Common UUID functionality for database adapters
+     - Provides `native_database_types`, `valid_type?`, `register_uuid_types`, `initialize_type_map`, `configure_connection`, and `type_to_dump` methods
+     - Shared by MySQL and SQLite adapters to eliminate code duplication
    - **MySQL (`lib/rails_uuid_pk/mysql2_adapter_extension.rb`)**: Extends MySQL2 adapter for UUID support using VARCHAR(36)
    - **SQLite (`lib/rails_uuid_pk/sqlite3_adapter_extension.rb`)**: Extends SQLite3 adapter for UUID support using VARCHAR(36)
    - Register custom UUID type handlers in database adapters

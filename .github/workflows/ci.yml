@@ -115,16 +115,16 @@ jobs:
 
           echo "Coverage: ${COVERAGE_PERCENT}%"
 
-          # Adjusted threshold: 85% (reasonable for library with database integrations)
+          # Adjusted threshold: 90% (high quality library standard)
           if command -v bc >/dev/null 2>&1 && [[ "$COVERAGE_PERCENT" =~ ^[0-9]*\.?[0-9]+$ ]]; then
-            COMPARISON=$(echo "$COVERAGE_PERCENT < 85.0" | bc -l)
+            COMPARISON=$(echo "$COVERAGE_PERCENT < 90.0" | bc -l)
           else
             COVERAGE_INT=${COVERAGE_PERCENT%.*}
-            COMPARISON=$([ "$COVERAGE_INT" -lt 85 ] && echo 1 || echo 0)
+            COMPARISON=$([ "$COVERAGE_INT" -lt 90 ] && echo 1 || echo 0)
           fi
 
           if [ "$COMPARISON" -eq 1 ]; then
-            echo "Error: Coverage below 85%: ${COVERAGE_PERCENT}%"
+            echo "Error: Coverage below 90%: ${COVERAGE_PERCENT}%"
             exit 1
           fi
 

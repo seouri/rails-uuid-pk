@@ -6,20 +6,24 @@ $: << File.expand_path("../test", __dir__)
 if ENV["COVERAGE"] == "true"
   require "bundler/setup"
   require "simplecov"
-  SimpleCov.start do
-    # Set the root directory to the project root
-    root File.expand_path("../", __dir__)
-    # Filter out test files and dummy app
+
+  # Configure SimpleCov for Minitest
+  SimpleCov.configure do
+    # Set the test framework to Minitest
+    # This helps SimpleCov recognize the framework
     add_filter "/test/"
     add_filter "/spec/"
     add_filter "/test/dummy/"
-    # Track coverage for the lib directory (the actual gem code)
     add_group "Library", "lib/"
     coverage_dir "coverage"
-    # Enable merging for multi-process test runs (SQLite, PostgreSQL, MySQL)
     enable_coverage :branch
     primary_coverage :line
     merge_timeout 3600
+  end
+
+  SimpleCov.start do
+    # Set command name for merging multi-database test runs
+    command_name "#{ENV['DB'] || 'unknown'}_tests"
   end
 else
   require "bundler/setup"

@@ -90,21 +90,57 @@ end
 - Full database function compatibility
 - Optimized for PostgreSQL 18's enhanced UUID handling
 
-#### MySQL (`mysql2` gem integration)
+#### Shared UUID Adapter Extension
 ```ruby
-# lib/rails_uuid_pk/mysql2_adapter_extension.rb
+# lib/rails_uuid_pk/uuid_adapter_extension.rb
 module RailsUuidPk
-  module Mysql2AdapterExtension
+  module UuidAdapterExtension
+    # Common UUID type support methods shared by MySQL and SQLite adapters
     def native_database_types
-      super.merge(
-        uuid: { name: "varchar", limit: 36 }
-      )
+      super.merge(uuid: { name: "varchar", limit: 36 })
+    end
+
+    def valid_type?(type)
+      return true if type == :uuid
+      super
     end
 
     def register_uuid_types(m = type_map)
       RailsUuidPk.log(:debug, "Registering UUID types on #{m.class}")
       m.register_type(/varchar\(36\)/i) { RailsUuidPk::Type::Uuid.new }
       m.register_type("uuid") { RailsUuidPk::Type::Uuid.new }
+    end
+
+    def initialize_type_map(m = type_map)
+      super
+      register_uuid_types(m)
+    end
+
+    def configure_connection
+      super
+      register_uuid_types
+    end
+
+    def type_to_dump(column)
+      if column.type == :uuid
+        return [ :uuid, {} ]
+      end
+      super
+    end
+  end
+end
+```
+
+#### MySQL (`mysql2` gem integration)
+```ruby
+# lib/rails_uuid_pk/mysql2_adapter_extension.rb
+module RailsUuidPk
+  module Mysql2AdapterExtension
+    include UuidAdapterExtension
+
+    # MySQL-specific connection configuration
+    def configure_connection
+      super  # Standard UUID type registration
     end
   end
 end
@@ -115,16 +151,13 @@ end
 # lib/rails_uuid_pk/sqlite3_adapter_extension.rb
 module RailsUuidPk
   module Sqlite3AdapterExtension
-    def native_database_types
-      super.merge(
-        uuid: { name: "varchar", limit: 36 }
-      )
-    end
+    include UuidAdapterExtension
 
-    def register_uuid_types(m = type_map)
-      RailsUuidPk.log(:debug, "Registering UUID types on #{m.class}")
-      m.register_type(/varchar\(36\)/i) { RailsUuidPk::Type::Uuid.new }
-      m.register_type("uuid") { RailsUuidPk::Type::Uuid.new }
+    # SQLite-specific connection configuration with transaction awareness
+    def configure_connection
+      # Only call super if not inside a transaction, as PRAGMA statements
+      # cannot be executed inside transactions in SQLite
+      super unless open_transactions > 0
     end
   end
 end

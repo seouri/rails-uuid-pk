@@ -4,8 +4,9 @@ module RailsUuidPk
   # SQLite adapter extension for UUID type support.
   #
   # This module extends ActiveRecord's SQLite3 adapter to provide native UUID
-  # type support. Since SQLite doesn't have a native UUID type, it maps UUIDs
-  # to VARCHAR(36) columns and registers the custom UUID type handlers.
+  # type support. It includes the shared UUID adapter extension functionality
+  # and provides SQLite-specific connection configuration, including transaction-aware
+  # connection setup.
   #
   # @example Automatic type mapping
   #   # SQLite tables with VARCHAR(36) columns are automatically treated as UUIDs
@@ -13,67 +14,22 @@ module RailsUuidPk
   #     t.column :id, :uuid  # Maps to VARCHAR(36) in SQLite
   #   end
   #
+  # @see RailsUuidPk::UuidAdapterExtension
   # @see RailsUuidPk::Type::Uuid
   # @see https://www.sqlite.org/datatype3.html
   module Sqlite3AdapterExtension
-    # Defines native database types for SQLite UUID support.
-    #
-    # @return [Hash] Database type definitions including UUID mapping
-    def native_database_types
-      super.merge(
-        uuid: { name: "varchar", limit: 36 }
-      )
-    end
-
-    # Checks if a type is valid for this adapter.
-    #
-    # Overrides ActiveRecord's valid_type? to recognize the custom UUID type.
-    #
-    # @param type [Symbol] The type to check
-    # @return [Boolean] true if the type is valid
-    def valid_type?(type)
-      return true if type == :uuid
-      super
-    end
-
-    # Registers UUID type handlers in the adapter's type map.
-    #
-    # @param m [ActiveRecord::ConnectionAdapters::AbstractAdapter::TypeMap] The type map to register with
-    # @return [void]
-    def register_uuid_types(m = type_map)
-      RailsUuidPk.log(:debug, "Registering UUID types on #{m.class}")
-      m.register_type(/varchar\(36\)/i) { RailsUuidPk::Type::Uuid.new }
-      m.register_type("uuid") { RailsUuidPk::Type::Uuid.new }
-    end
-
-    # Initializes the type map with UUID type registrations.
-    #
-    # @param m [ActiveRecord::ConnectionAdapters::AbstractAdapter::TypeMap] The type map to initialize
-    # @return [void]
-    def initialize_type_map(m = type_map)
-      super
-      register_uuid_types(m)
-    end
+    include UuidAdapterExtension
 
     # Configures the database connection with UUID type support.
+    #
+    # SQLite-specific implementation that avoids calling super inside transactions,
+    # as PRAGMA statements cannot be executed inside transactions in SQLite.
     #
     # @return [void]
     def configure_connection
       # Only call super if not inside a transaction, as PRAGMA statements
       # cannot be executed inside transactions in SQLite
       super unless open_transactions > 0
-      register_uuid_types
-    end
-
-    # Overrides type dumping to properly handle UUID columns.
-    #
-    # @param column [ActiveRecord::ConnectionAdapters::Column] The column to dump
-    # @return [Array] The type and options for the schema dump
-    def type_to_dump(column)
-      if column.type == :uuid
-        return [ :uuid, {} ]
-      end
-      super
     end
   end
 end

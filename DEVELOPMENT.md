@@ -260,6 +260,7 @@ rails-uuid-pk/
 │   │   ├── railtie.rb            # Rails integration
 │   │   ├── sqlite3_adapter_extension.rb # SQLite adapter UUID support
 │   │   ├── type.rb               # Custom UUID ActiveRecord type
+│   │   ├── uuid_adapter_extension.rb    # Shared UUID adapter functionality
 │   │   └── version.rb            # Version info
 │   └── generators/               # Rails generators (removed - gem is now zero-config)
 ├── test/                         # Test suite
