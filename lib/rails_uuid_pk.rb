@@ -8,6 +8,9 @@ require "rails_uuid_pk/sqlite3_adapter_extension"
 require "rails_uuid_pk/mysql2_adapter_extension"
 require "rails_uuid_pk/railtie"
 
+# Load generators
+require "generators/rails_uuid_pk/add_opt_outs_generator" if defined?(Rails::Generators)
+
 # Rails UUID Primary Key
 #
 # A Rails gem that automatically uses UUIDv7 for all primary keys in Rails applications.

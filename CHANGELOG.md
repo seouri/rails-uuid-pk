@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 
 ## [0.13.0] - 2026-01-20
 
+### Added
+- **`rails_uuid_pk:add_opt_outs` Rails Generator**: New generator to automatically add `use_integer_primary_key` to models with integer primary keys in existing applications
+  - Scans all ActiveRecord models in `app/models/**/*.rb`
+  - Inspects database schema to detect integer primary keys
+  - Adds `use_integer_primary_key` calls to eligible models
+  - Command-line options: `--dry-run` (preview changes), `--verbose` (detailed output)
+  - Idempotent operation - safe to run multiple times
+  - Comprehensive error handling and user feedback
+
+### Changed
+- **Documentation Consistency**: Ensured all documentation files consistently communicate that UUIDv7 is the default behavior, while opt-out functionality exists for exceptional cases (legacy tables, third-party integrations, etc.)
+
 ### Documentation
 - **Clarified Default UUIDv7 Behavior**: Updated all documentation files to explicitly state that rails-uuid-pk assumes UUIDv7 primary keys by default for all models, with `use_integer_primary_key` being an exception for models requiring integer primary keys
   - **README.md**: Emphasized "Assumes UUIDv7 primary keys by default" and clarified opt-out as "Exception: Opting Out"
@@ -14,8 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
   - **DEVELOPMENT.md**: Clarified opt-out functionality as "exceptions only" for specific use cases
   - **AGENTS.md**: Updated project overview to state "automatically assumes UUIDv7 primary keys by default... Models requiring integer primary keys are treated as exceptions"
 
-### Changed
-- **Documentation Consistency**: Ensured all documentation files consistently communicate that UUIDv7 is the default behavior, while opt-out functionality exists for exceptional cases (legacy tables, third-party integrations, etc.)
+### Technical Details
+- Added `lib/generators/rails_uuid_pk/add_opt_outs_generator.rb` with full Rails generator implementation
+- Added `lib/generators/rails_uuid_pk/templates/.keep` for directory structure maintenance
+- Added `test/generators/add_opt_outs_generator_test.rb` with comprehensive test suite (9 tests, 18 assertions)
+- Updated `lib/rails_uuid_pk.rb` to load generator components
+- Generator includes smart model file parsing, database schema inspection, and safe file modification
+- Full cross-database compatibility (PostgreSQL, MySQL, SQLite)
+- Production-ready with proper error handling and logging integration
 
 ## [0.12.0] - 2026-01-17
 

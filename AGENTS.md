@@ -89,12 +89,18 @@ rails-uuid-pk/
 │   │   ├── type.rb               # Custom UUID ActiveRecord type
 │   │   ├── uuid_adapter_extension.rb    # Shared UUID adapter functionality
 │   │   └── version.rb            # Version info
-│   └── generators/               # Rails generators (removed - gem is now zero-config)
+│   ├── generators/               # Rails generators
+│   │   └── rails_uuid_pk/
+│   │       ├── add_opt_outs_generator.rb  # Generator for adding opt-out calls
+│   │       └── templates/         # Generator templates
+│   └── tasks/                     # Rake tasks
+│       └── rails_uuid_pk_tasks.rake  # Custom rake tasks
 ├── test/                         # Test suite
 │   ├── configuration/            # Configuration and setup tests
 │   ├── database_adapters/        # Database-specific adapter tests
 │   ├── dummy/                    # Rails dummy app for testing
 │   ├── migration_helpers/        # Migration helper functionality tests
+│   ├── generators/                # Generator tests
 │   ├── test_helper.rb            # Test configuration
 │   └── uuid/                     # UUID generation and type tests
 ├── bin/                          # Executable scripts
@@ -102,12 +108,23 @@ rails-uuid-pk/
 │   ├── coverage                  # Test coverage reporting
 │   ├── rubocop                   # Code quality checker
 │   └── test                      # Test runner
-├── .github/workflows/ci.yml      # CI configuration
+├── .github/                      # GitHub configuration
+│   ├── dependabot.yml            # Dependency update automation
+│   └── workflows/
+│       └── ci.yml                # CI configuration
+├── .gitignore                    # Git ignore patterns
+├── .rubocop.yml                  # Code style configuration
+├── Gemfile                       # Development dependencies
+├── Gemfile.lock                  # Dependency lock file
+├── MIT-LICENSE                   # License file
+├── Rakefile                      # Rake tasks configuration
 ├── rails_uuid_pk.gemspec         # Gem specification
 ├── ARCHITECTURE.md               # Architectural decisions and design rationale
-├── SECURITY.md                   # Security policy and considerations
+├── CHANGELOG.md                  # Version history and changes
+├── DEVELOPMENT.md                # Development setup and guidelines
 ├── PERFORMANCE.md                # Detailed performance analysis and optimization
-└── README.md                     # User documentation
+├── README.md                     # User documentation
+└── SECURITY.md                   # Security policy and considerations
 ```
 
 ## Code Architecture
@@ -323,9 +340,16 @@ yard doc lib/
 3. Consider schema format implications
 
 #### Generator Changes
-1. Modify templates in `lib/generators/rails_uuid_pk/install/templates/`
-2. Update generator logic in `install_generator.rb`
+1. Modify templates in `lib/generators/rails_uuid_pk/add_opt_outs/templates/`
+2. Update generator logic in `add_opt_outs_generator.rb`
 3. Test generator output
+
+#### Migration Generator
+1. The `rails_uuid_pk:add_opt_outs` generator scans all ActiveRecord models
+2. Checks database schema for primary key types
+3. Adds `use_integer_primary_key` to models with integer primary keys
+4. Tests in `test/generators/add_opt_outs_generator_test.rb`
+5. Update documentation in README.md when adding new generators
 
 #### Migration Helpers
 1. Modify `lib/rails_uuid_pk/migration_helpers.rb` for foreign key type detection logic

@@ -73,6 +73,24 @@ create_table :related_records do |t|
 end
 ```
 
+### Migrating Existing Applications
+
+For existing Rails applications with integer primary keys, use the included generator to automatically add `use_integer_primary_key` to models with integer primary keys:
+
+```bash
+rails generate rails_uuid_pk:add_opt_outs
+```
+
+This generator:
+- Scans all ActiveRecord models in your application
+- Checks the database schema for primary key types
+- Adds `use_integer_primary_key` to models with integer primary keys
+- Is idempotent and safe to run multiple times
+
+Options:
+- `--dry-run`: Show what would be changed without modifying files
+- `--verbose`: Provide detailed output (default: true)
+
 ## Important Compatibility Notes
 
 ### Action Text & Active Storage
