@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
+## [0.13.0] - 2026-01-20
+
+### Documentation
+- **Clarified Default UUIDv7 Behavior**: Updated all documentation files to explicitly state that rails-uuid-pk assumes UUIDv7 primary keys by default for all models, with `use_integer_primary_key` being an exception for models requiring integer primary keys
+  - **README.md**: Emphasized "Assumes UUIDv7 primary keys by default" and clarified opt-out as "Exception: Opting Out"
+  - **ARCHITECTURE.md**: Updated "Zero-Configuration Philosophy" to highlight automatic UUIDv7 primary keys by default
+  - **DEVELOPMENT.md**: Clarified opt-out functionality as "exceptions only" for specific use cases
+  - **AGENTS.md**: Updated project overview to state "automatically assumes UUIDv7 primary keys by default... Models requiring integer primary keys are treated as exceptions"
+
+### Changed
+- **Documentation Consistency**: Ensured all documentation files consistently communicate that UUIDv7 is the default behavior, while opt-out functionality exists for exceptional cases (legacy tables, third-party integrations, etc.)
+
 ## [0.12.0] - 2026-01-17
 
 ### Changed

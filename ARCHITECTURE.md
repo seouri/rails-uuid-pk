@@ -5,10 +5,10 @@ This document outlines the architectural decisions, design principles, and techn
 ## Core Design Principles
 
 ### Zero-Configuration Philosophy
-**Decision**: Automatic integration without explicit configuration
-- **Rationale**: Maximize ease of adoption for Rails developers
-- **Implementation**: Railtie-based automatic inclusion in `ActiveRecord::Base`
-- **Impact**: Just add the gem to Gemfile - no additional setup required
+**Decision**: Automatic UUIDv7 primary keys for all models by default
+- **Rationale**: Maximize ease of adoption for Rails developers while modernizing primary key usage
+- **Implementation**: Railtie-based automatic inclusion in `ActiveRecord::Base` with opt-out mechanism
+- **Impact**: Just add the gem to Gemfile - all models use UUIDv7 PKs, exceptions require explicit opt-out
 
 ### Database Agnosticism
 **Decision**: Support PostgreSQL, MySQL, and SQLite with unified API

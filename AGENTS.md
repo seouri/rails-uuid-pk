@@ -4,7 +4,7 @@ This guide helps LLM coding agents understand and contribute to the rails-uuid-p
 
 ## Project Overview
 
-**rails-uuid-pk** is a Ruby gem that automatically uses UUIDv7 for all primary keys in Ruby on Rails applications. It provides seamless integration with Rails generators, automatic UUIDv7 generation, and support for PostgreSQL, MySQL, and SQLite databases.
+**rails-uuid-pk** is a Ruby gem that automatically assumes UUIDv7 primary keys by default for all models in Ruby on Rails applications. It provides seamless integration with Rails generators, automatic UUIDv7 generation, and support for PostgreSQL, MySQL, and SQLite databases. Models requiring integer primary keys are treated as exceptions and must explicitly opt out using `use_integer_primary_key`.
 
 ### Key Features
 - Automatic UUIDv7 primary key generation using Ruby 3.3+ `SecureRandom.uuid_v7`

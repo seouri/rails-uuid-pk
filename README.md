@@ -11,6 +11,7 @@ Automatically use UUID v7 for **all primary keys** in Rails applications. Works 
 
 ## Why this gem?
 
+- **Assumes UUIDv7 primary keys by default** for all models - just add the gem and you're done!
 - Uses **native** `SecureRandom.uuid_v7` (Ruby 3.3+)
 - Automatically sets `:uuid` as default primary key type
 - Works perfectly on PostgreSQL, MySQL, and SQLite
@@ -22,7 +23,7 @@ Automatically use UUID v7 for **all primary keys** in Rails applications. Works 
 Add to your `Gemfile`:
 
 ```ruby
-gem "rails-uuid-pk", "~> 0.12"
+gem "rails-uuid-pk", "~> 0.13"
 ```
 
 Then run:
@@ -35,7 +36,7 @@ That's it! The gem automatically enables UUIDv7 primary keys for all your models
 
 ## Usage
 
-After installation, **every new model** automatically gets a `uuid` primary key with UUIDv7 values:
+**By default, all models use UUIDv7 primary keys.** After installation, every new model automatically gets a `uuid` primary key with UUIDv7 values:
 
 ```bash
 rails g model User name:string email:string
@@ -47,29 +48,28 @@ rails g model User name:string email:string
 User.create!(name: "Alice")  # ← id is automatically a proper UUIDv7
 ```
 
-### Opting Out of UUID Primary Keys
+### Exception: Opting Out of UUID Primary Keys
 
-For specific models, you can opt out:
+For **exceptional cases** where you need integer primary keys (legacy tables, third-party integrations, etc.), you can explicitly opt out:
 
 ```ruby
 class LegacyModel < ApplicationRecord
-  use_integer_primary_key
-  # Uses integer auto-incrementing primary key instead of UUIDv7
+  use_integer_primary_key  # Exception: this model uses integer PKs instead
 end
 
-# Migration must also use :integer
+# Migration must also specify :integer for the table
 create_table :legacy_models, id: :integer do |t|
   t.string :name
 end
 ```
 
-Migration helpers automatically detect mixed primary key types and set appropriate foreign key types:
+**Migration helpers automatically detect mixed primary key types** and set appropriate foreign key types:
 
 ```ruby
-# Rails will automatically use integer foreign keys when referencing LegacyModel
+# Rails will automatically use the correct foreign key types
 create_table :related_records do |t|
-  t.references :legacy_model, null: false  # → integer foreign key
-  t.references :user, null: false          # → UUID foreign key (User uses UUIDs)
+  t.references :legacy_model, null: false  # → integer foreign key (LegacyModel uses integers)
+  t.references :user, null: false          # → UUID foreign key (User uses UUIDs by default)
 end
 ```
 

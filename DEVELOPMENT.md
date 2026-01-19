@@ -159,11 +159,12 @@ yard doc lib/
 4. Test bulk operation scenarios to ensure data consistency
 
 #### Opt-out Functionality
-1. Use `use_integer_primary_key` class method to opt out of UUID generation for specific models
-2. Modify generated migration to change `id: :uuid` to `id: :integer` for the table schema
-3. Migration helpers automatically detect mixed primary key types and set appropriate foreign key types
-4. Test mixed scenarios thoroughly when combining UUID and integer primary key models
-5. **Inheritance behavior**: Subclasses do NOT automatically inherit the opt-out setting. Each class must explicitly call `use_integer_primary_key`. This is intentional to prevent accidental inheritance in polymorphic hierarchies where different tables may have different primary key types.
+1. **Default behavior**: rails-uuid-pk assumes UUIDv7 primary keys for all models by default
+2. **Exceptions only**: Use `use_integer_primary_key` class method ONLY for specific models that need integer primary keys (legacy tables, third-party integrations, etc.)
+3. When opting out: Modify generated migration to change `id: :uuid` to `id: :integer` for the table schema
+4. Migration helpers automatically detect mixed primary key types and set appropriate foreign key types
+5. Test mixed scenarios thoroughly when combining UUID and integer primary key models
+6. **Inheritance behavior**: Subclasses do NOT automatically inherit the opt-out setting. Each class must explicitly call `use_integer_primary_key`. This is intentional to prevent accidental inheritance in polymorphic hierarchies where different tables may have different primary key types.
 
 ## Coding Conventions
 
