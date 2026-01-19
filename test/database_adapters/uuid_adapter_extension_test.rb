@@ -140,4 +140,54 @@ class UuidAdapterExtensionTest < ActiveSupport::TestCase
     types = adapter.native_database_types
     assert types.key?(:uuid), "#{adapter_name} should have UUID in native types"
   end
+
+  test "uuid adapter extension type_to_dump" do
+    mock_adapter = Object.new
+    mock_adapter.extend(RailsUuidPk::UuidAdapterExtension)
+
+    # Mock column
+    column = Object.new
+    def column.type; :uuid; end
+
+    result = mock_adapter.type_to_dump(column)
+    assert_equal [ :uuid, {} ], result
+
+    # Test non-uuid column - it should call super
+    # We need a class that has a super method
+    parent_class = Class.new do
+      def type_to_dump(column)
+        [ :integer, {} ]
+      end
+    end
+
+    test_class = Class.new(parent_class) do
+      include RailsUuidPk::UuidAdapterExtension
+    end
+
+    instance = test_class.new
+    integer_column = Object.new
+    def integer_column.type; :integer; end
+
+    assert_equal [ :integer, {} ], instance.type_to_dump(integer_column)
+  end
+
+  test "uuid adapter extension register_uuid_types" do
+    mock_adapter = Object.new
+    mock_adapter.extend(RailsUuidPk::UuidAdapterExtension)
+
+    # Mock type map
+    mock_type_map = Object.new
+    mock_type_map.instance_variable_set(:@registered_patterns, [])
+
+    def mock_type_map.register_type(pattern, &block)
+      @registered_patterns << pattern
+    end
+
+    def mock_type_map.registered_patterns; @registered_patterns; end
+
+    mock_adapter.register_uuid_types(mock_type_map)
+
+    assert_includes mock_type_map.registered_patterns, /varchar\(36\)/i
+    assert_includes mock_type_map.registered_patterns, "uuid"
+  end
 end

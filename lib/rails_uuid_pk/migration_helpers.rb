@@ -190,7 +190,10 @@ module RailsUuidPk
         return false unless conn.respond_to?(:table_exists?) && conn.table_exists?(table_name)
 
         pk_column = find_primary_key_column(table_name, conn)
-        @uuid_pk_cache[table_name] = !!(pk_column && pk_column.sql_type.downcase.match?(/\A(uuid|varchar\(36\))\z/))
+        @uuid_pk_cache[table_name] = !!(pk_column && pk_column.sql_type&.downcase&.match?(/\A(uuid|varchar\(36\))\z/))
+      rescue StandardError
+        # Handle database connection errors gracefully
+        @uuid_pk_cache[table_name] = false
       end
 
       # Finds the primary key column for a given table.
@@ -200,7 +203,8 @@ module RailsUuidPk
       # @return [ActiveRecord::ConnectionAdapters::Column, nil] The primary key column or nil
       def find_primary_key_column(table_name, conn)
         pk_name = conn.primary_key(table_name)
-        return nil unless pk_name
+        # Only consider standard Rails primary keys named 'id' for UUID detection
+        return nil unless pk_name == "id"
 
         conn.columns(table_name).find { |c| c.name == pk_name }
       end

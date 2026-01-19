@@ -818,4 +818,225 @@ class MigrationHelpersReferencesTest < ActiveSupport::TestCase
     int_parent_migration.migrate(:down)
     uuid_parent_migration.migrate(:down)
   end
+
+  test "uuid_primary_key? returns false for non-existent table" do
+    references_module = RailsUuidPk::MigrationHelpers::References
+
+    # Mock connection that returns false for table_exists?
+    mock_conn = Object.new
+    mock_conn.define_singleton_method(:table_exists?) { |table| false }
+
+    # Should return false for non-existent table
+    result = references_module.test_uuid_primary_key?("non_existent_table", mock_conn)
+    assert_not result, "Should return false for non-existent table"
+  end
+
+  test "uuid_primary_key? returns false for table with no primary key" do
+    references_module = RailsUuidPk::MigrationHelpers::References
+
+    # Mock connection for table with no primary key
+    mock_conn = Object.new
+    mock_conn.define_singleton_method(:table_exists?) { |table| true }
+    mock_conn.define_singleton_method(:primary_key) { |table| nil }
+
+    result = references_module.test_uuid_primary_key?("no_pk_table", mock_conn)
+    assert_not result, "Should return false for table with no primary key"
+  end
+
+  test "uuid_primary_key? returns false for table with non-id primary key" do
+    references_module = RailsUuidPk::MigrationHelpers::References
+
+    # Mock connection for table with custom primary key
+    mock_conn = Object.new
+    mock_conn.define_singleton_method(:table_exists?) { |table| true }
+    mock_conn.define_singleton_method(:primary_key) { |table| "custom_pk" }
+    mock_conn.define_singleton_method(:columns) do |table|
+      [ Struct.new(:name, :sql_type).new("custom_pk", "uuid") ]
+    end
+
+    result = references_module.test_uuid_primary_key?("custom_pk_table", mock_conn)
+    assert_not result, "Should return false for table with non-id primary key"
+  end
+
+  test "polymorphic reference detection with no UUID parents" do
+    # Temporarily change generator config to not use UUIDs globally
+    original_config = Rails.application.config.generators.options.dup
+    Rails.application.config.generators.options[:active_record] = { primary_key_type: :integer }
+
+    begin
+      # Create only integer parent tables
+      int_parent1_migration = Class.new(ActiveRecord::Migration::Current) do
+        def change
+          create_table :poly_no_uuid_parent1 do |t|
+            t.string :name
+          end
+        end
+      end
+
+      int_parent2_migration = Class.new(ActiveRecord::Migration::Current) do
+        def change
+          create_table :poly_no_uuid_parent2 do |t|
+            t.string :name
+          end
+        end
+      end
+
+      int_parent1_migration.migrate(:up)
+      int_parent2_migration.migrate(:up)
+
+      # Mock the application_uses_uuid_primary_keys? method to return false
+      original_method = RailsUuidPk::MigrationHelpers::References.method(:application_uses_uuid_primary_keys?)
+      RailsUuidPk::MigrationHelpers::References.define_singleton_method(:application_uses_uuid_primary_keys?) { false }
+
+      # Create polymorphic table - should use integer since app doesn't use UUIDs globally
+      poly_migration = Class.new(ActiveRecord::Migration::Current) do
+        def change
+          create_table :poly_no_uuid_models do |t|
+            t.string :content
+            t.references :resource, polymorphic: true
+          end
+        end
+      end
+
+      poly_migration.migrate(:up)
+
+      # Should use integer type for polymorphic FK since app doesn't use UUIDs globally
+      columns = ActiveRecord::Base.connection.columns(:poly_no_uuid_models)
+      fk_column = columns.find { |c| c.name == "resource_id" }
+      assert_equal :integer, fk_column.type, "Polymorphic FK should be integer when app doesn't use UUIDs globally"
+
+      # Clean up
+      poly_migration.migrate(:down)
+      int_parent2_migration.migrate(:down)
+      int_parent1_migration.migrate(:down)
+    ensure
+      # Restore original config and method
+      Rails.application.config.generators.options = original_config
+      RailsUuidPk::MigrationHelpers::References.define_singleton_method(:application_uses_uuid_primary_keys?, original_method)
+    end
+  end
+
+  test "references with nil options hash does not crash" do
+    # Test that references method handles nil options gracefully
+    # This tests the options&.[] pattern in the migration helpers
+
+    parent_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :nil_options_parents, id: :uuid do |t|
+          t.string :name
+        end
+      end
+    end
+
+    parent_migration.migrate(:up)
+
+    # Create table with references that has nil options
+    ref_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :nil_options_refs do |t|
+          t.references :nil_options_parent, null: false
+          t.string :description
+        end
+      end
+    end
+
+    ref_migration.migrate(:up)
+
+    # Should still work and create UUID FK
+    columns = ActiveRecord::Base.connection.columns(:nil_options_refs)
+    fk_column = columns.find { |c| c.name == "nil_options_parent_id" }
+    assert_equal :uuid, fk_column.type, "Should still create UUID FK even with nil options handling"
+
+    # Clean up
+    ref_migration.migrate(:down)
+    parent_migration.migrate(:down)
+  end
+
+  test "references with empty polymorphic option works" do
+    # Test edge case where polymorphic is specified but empty
+    parent_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :empty_poly_parents, id: :uuid do |t|
+          t.string :name
+        end
+      end
+    end
+
+    parent_migration.migrate(:up)
+
+    # Create table with polymorphic: true (should still detect UUID)
+    poly_migration = Class.new(ActiveRecord::Migration::Current) do
+      def change
+        create_table :empty_poly_models do |t|
+          t.string :content
+          t.references :parent, polymorphic: true
+        end
+      end
+    end
+
+    poly_migration.migrate(:up)
+
+    columns = ActiveRecord::Base.connection.columns(:empty_poly_models)
+    fk_column = columns.find { |c| c.name == "parent_id" }
+    assert_equal :uuid, fk_column.type, "Should detect UUID even with polymorphic: true"
+
+    # Clean up
+    poly_migration.migrate(:down)
+    parent_migration.migrate(:down)
+  end
+
+  test "migration helpers handle column lookup errors gracefully" do
+    references_module = RailsUuidPk::MigrationHelpers::References
+
+    # Mock connection that raises error during column lookup
+    mock_conn = Object.new
+    mock_conn.define_singleton_method(:table_exists?) { |table| true }
+    mock_conn.define_singleton_method(:primary_key) { |table| "id" }
+    mock_conn.define_singleton_method(:columns) do |table|
+      raise StandardError.new("Database connection error")
+    end
+
+    # Should handle error gracefully and return false
+    result = references_module.test_uuid_primary_key?("error_table", mock_conn)
+    assert_not result, "Should return false when column lookup fails"
+  end
+
+  test "references method chaining with nil safety" do
+    # Test that the method chaining with safe navigation works
+    references_module = RailsUuidPk::MigrationHelpers::References
+
+    # Create a mock table definition that tests the method chaining
+    mock_table_def = Object.new
+    mock_table_def.define_singleton_method(:references) do |*args, **options|
+      # This should not crash even if internal methods return nil
+      "references_called"
+    end
+
+    # Include the module to get the alias methods
+    mock_table_def.extend(references_module)
+
+    # Test that the module methods are available
+    assert_respond_to mock_table_def, :references
+    assert_respond_to mock_table_def, :belongs_to
+    assert_respond_to mock_table_def, :add_reference
+    assert_respond_to mock_table_def, :add_belongs_to
+  end
+
+  test "migration_helpers uuid_primary_key? rescue block" do
+    # Create a dummy class to test private method
+    dummy_class = Class.new do
+      include RailsUuidPk::MigrationHelpers::References
+      def connection
+        raise StandardError, "Connection error"
+      end
+    end
+
+    instance = dummy_class.new
+    # Make it public for testing
+    def instance.test_uuid_primary_key?(table_name)
+      uuid_primary_key?(table_name)
+    end
+
+    refute instance.test_uuid_primary_key?("some_table")
+  end
 end

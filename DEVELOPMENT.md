@@ -282,6 +282,7 @@ rails-uuid-pk/
 │   └── tasks/                     # Rake tasks
 │       └── rails_uuid_pk_tasks.rake  # Custom rake tasks
 ├── test/                         # Test suite
+│   ├── railtie_test.rb           # Dedicated railtie functionality tests
 │   ├── configuration/            # Configuration and setup tests
 │   ├── database_adapters/        # Database-specific adapter tests
 │   ├── dummy/                    # Rails dummy app for testing

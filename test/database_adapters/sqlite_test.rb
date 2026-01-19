@@ -55,8 +55,6 @@ class SqliteAdapterTest < ActiveSupport::TestCase
     TestStringColumn.migrate(:down)
   end
 
-
-
   test "SQLite schema dumping uses :uuid type" do
     skip "Only runs on SQLite" unless ActiveRecord::Base.connection.adapter_name == "SQLite"
 
@@ -80,5 +78,33 @@ class SqliteAdapterTest < ActiveSupport::TestCase
     ensure
       migration.migrate(:down)
     end
+  end
+
+  test "sqlite3 adapter extension configure_connection inside transaction" do
+    # This simulates how Sqlite3AdapterExtension handles configure_connection
+    # avoiding re-configuration when inside a transaction
+
+    parent_class = Class.new do
+      def configure_connection
+        @super_called = true
+      end
+      attr_reader :super_called
+    end
+
+    test_class = Class.new(parent_class) do
+      include RailsUuidPk::Sqlite3AdapterExtension
+      attr_accessor :open_transactions
+      # Mock register_uuid_types which is called in configure_connection
+      def register_uuid_types; end
+    end
+
+    instance = test_class.new
+    instance.open_transactions = 1
+    instance.configure_connection
+    refute instance.super_called, "Should not call super (re-configure) when inside transaction"
+
+    instance.open_transactions = 0
+    instance.configure_connection
+    assert instance.super_called, "Should call super when not inside transaction"
   end
 end

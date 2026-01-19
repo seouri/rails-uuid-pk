@@ -343,4 +343,23 @@ class MysqlAdapterTest < ActiveSupport::TestCase
     # Clean up
     varchar_mapping_migration.migrate(:down)
   end
+
+  test "mysql2 adapter extension configure_connection" do
+    parent_class = Class.new do
+      def configure_connection; @super_called = true; end
+      attr_reader :super_called
+    end
+
+    test_class = Class.new(parent_class) do
+      include RailsUuidPk::Mysql2AdapterExtension
+      def register_uuid_types; @register_called = true; end
+      attr_reader :register_called
+    end
+
+    instance = test_class.new
+    instance.configure_connection
+
+    assert instance.super_called
+    assert instance.register_called
+  end
 end

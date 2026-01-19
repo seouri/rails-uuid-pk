@@ -30,10 +30,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 - Added `lib/generators/rails_uuid_pk/add_opt_outs_generator.rb` with full Rails generator implementation
 - Added `lib/generators/rails_uuid_pk/templates/.keep` for directory structure maintenance
 - Added `test/generators/add_opt_outs_generator_test.rb` with comprehensive test suite (9 tests, 18 assertions)
+- Added `test/railtie_test.rb` with dedicated railtie functionality tests
 - Updated `lib/rails_uuid_pk.rb` to load generator components
 - Generator includes smart model file parsing, database schema inspection, and safe file modification
 - Full cross-database compatibility (PostgreSQL, MySQL, SQLite)
 - Production-ready with proper error handling and logging integration
+
+### Fixed
+- **Migration Helpers Robustness**: Enhanced primary key detection with improved error handling and safety checks
+  - Added safe navigation operators (`&.`) for `sql_type` access to prevent `NoMethodError` on nil objects
+  - Added comprehensive error handling with rescue blocks for database connection failures
+  - Restricted UUID primary key detection to only consider standard Rails primary keys named 'id'
+  - Graceful fallback to integer foreign keys when database operations fail
+
+### Testing
+- **Comprehensive Test Suite Expansion**: Added extensive test coverage for edge cases and error scenarios
+  - Added `test/railtie_test.rb` with 1 test covering railtie connection registration logic
+  - Expanded `test/configuration/setup_test.rb` with 5 additional tests (12 total) covering railtie UUID type registration, database configurations, migration helpers inclusion, adapter extension registration, and schema format configuration
+  - Enhanced `test/database_adapters/mysql_test.rb` with 1 additional test for MySQL adapter extension `configure_connection` behavior
+  - Enhanced `test/database_adapters/sqlite_test.rb` with 1 additional test for SQLite adapter extension transaction-aware configuration
+  - Enhanced `test/database_adapters/uuid_adapter_extension_test.rb` with 2 additional tests covering `type_to_dump` functionality and migration helpers edge cases
+  - Expanded `test/migration_helpers/references_test.rb` with 6 additional tests (11 total) covering polymorphic associations with mixed primary key types, nil options handling, empty polymorphic options, column lookup error handling, method chaining safety, and rescue block behavior
+  - Total test expansion: 16 new tests across 6 test files, improving robustness and edge case coverage
 
 ## [0.12.0] - 2026-01-17
 

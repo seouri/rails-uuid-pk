@@ -23,6 +23,11 @@ module RailsUuidPk
 
       def teardown
         FileUtils.remove_entry @temp_dir
+
+        # Cleanup constants if defined
+        Object.send(:remove_const, :CoverageUser) if Object.const_defined?(:CoverageUser)
+        Object.send(:remove_const, :CoveragePost) if Object.const_defined?(:CoveragePost)
+        Object.send(:remove_const, :CoveragePlain) if Object.const_defined?(:CoveragePlain)
       end
 
       def test_extract_class_name_from_file
@@ -158,6 +163,195 @@ module RailsUuidPk
         files = @generator.send(:find_model_files)
         assert_includes files, user_file
         assert_includes files, post_file
+      end
+
+      def test_add_opt_out_to_model_error_handling
+        # Create a file that will cause an error when writing
+        models_dir = File.join(@temp_dir, "app", "models")
+        FileUtils.mkdir_p(models_dir)
+        model_file = File.join(models_dir, "error_model.rb")
+        File.write(model_file, @model_content)
+
+        # Make file read-only to cause write error
+        File.chmod(0444, model_file)
+
+        result = @generator.send(:add_opt_out_to_model, model_file, "ErrorModel")
+        refute result
+
+        # Restore permissions for cleanup
+        File.chmod(0644, model_file)
+      end
+
+      def test_add_opt_out_to_model_with_malformed_class
+        malformed_content = <<~RUBY
+          # Missing class definition
+          def some_method
+          end
+        RUBY
+
+        file_path = File.join(@temp_dir, "malformed.rb")
+        File.write(file_path, malformed_content)
+
+        result = @generator.send(:add_opt_out_to_model, file_path, "MalformedModel")
+        refute result
+      end
+
+      def test_check_primary_key_type_unknown_column
+        connection = Object.new
+        def connection.columns(table)
+          [] # No columns
+        end
+
+        result = @generator.send(:check_primary_key_type, "empty_table", connection)
+        assert_equal :unknown, result
+      end
+
+      def test_check_primary_key_type_unknown_type
+        column = Object.new
+        def column.name; "id"; end
+        def column.type; :unknown_type; end
+        connection = Object.new
+        connection.instance_variable_set(:@column, column)
+        def connection.columns(table); [ @column ]; end
+
+        result = @generator.send(:check_primary_key_type, "test_table", connection)
+        assert_equal :unknown, result
+      end
+
+      def test_analyze_models_with_various_model_files
+        FileUtils.mkdir_p(File.join(@temp_dir, "app/models"))
+
+        # Mock destination_root method
+        @generator.instance_eval do
+          def destination_root
+            @destination_root
+          end
+          def destination_root=(val)
+            @destination_root = val
+          end
+        end
+        @generator.destination_root = @temp_dir
+
+        # Create an integer PK model
+        File.write(File.join(@temp_dir, "app/models/coverage_user.rb"), <<~RUBY)
+          class CoverageUser < ActiveRecord::Base
+          end
+        RUBY
+
+        # Create a UUID PK model
+        File.write(File.join(@temp_dir, "app/models/coverage_post.rb"), <<~RUBY)
+          class CoveragePost < ActiveRecord::Base
+          end
+        RUBY
+
+        # Create a non-ActiveRecord model
+        File.write(File.join(@temp_dir, "app/models/coverage_plain.rb"), <<~RUBY)
+          class CoveragePlain
+          end
+        RUBY
+
+        # Mock connection
+        mock_conn = Object.new
+        def mock_conn.table_exists?(name); true; end
+        def mock_conn.columns(table_name)
+          col = Object.new
+          def col.name; "id"; end
+          if table_name == "coverage_users"
+            def col.type; :integer; end
+          else
+            def col.type; :uuid; end
+          end
+          [ col ]
+        end
+
+        # Define test classes
+        Object.const_set(:CoverageUser, Class.new(ActiveRecord::Base) { self.table_name = "coverage_users" })
+        Object.const_set(:CoveragePost, Class.new(ActiveRecord::Base) { self.table_name = "coverage_posts" })
+        Object.const_set(:CoveragePlain, Class.new)
+
+        # Manual stubbing of ActiveRecord::Base.connection
+        class << ActiveRecord::Base
+          alias_method :original_connection, :connection
+          def connection; @mock_connection; end
+          attr_accessor :mock_connection
+        end
+        ActiveRecord::Base.mock_connection = mock_conn
+
+        begin
+          results = @generator.send(:analyze_models)
+
+          assert_equal 2, results.size
+          user_result = results.find { |r| r[:model_class] == CoverageUser }
+          post_result = results.find { |r| r[:model_class] == CoveragePost }
+
+          assert user_result[:needs_opt_out]
+          refute post_result[:needs_opt_out]
+        ensure
+          class << ActiveRecord::Base
+            remove_method :connection
+            alias_method :connection, :original_connection
+            remove_method :original_connection
+            remove_method :mock_connection
+            remove_method :mock_connection=
+          end
+        end
+      end
+
+      def test_analyze_and_modify_models_integration
+        FileUtils.mkdir_p(File.join(@temp_dir, "app/models"))
+
+        # Mock destination_root method
+        @generator.instance_eval do
+          def destination_root
+            @destination_root
+          end
+          def destination_root=(val)
+            @destination_root = val
+          end
+        end
+        @generator.destination_root = @temp_dir
+
+        # Setup integer PK model
+        File.write(File.join(@temp_dir, "app/models/coverage_user.rb"), <<~RUBY)
+          class CoverageUser < ActiveRecord::Base
+          end
+        RUBY
+
+        mock_conn = Object.new
+        def mock_conn.table_exists?(name); true; end
+        def mock_conn.columns(table_name)
+          col = Object.new
+          def col.name; "id"; end
+          def col.type; :integer; end
+          [ col ]
+        end
+
+        Object.const_set(:CoverageUser, Class.new(ActiveRecord::Base) { self.table_name = "coverage_users" })
+
+        # Manual stubbing
+        class << ActiveRecord::Base
+          alias_method :original_connection2, :connection
+          def connection; @mock_connection2; end
+          attr_accessor :mock_connection2
+        end
+        ActiveRecord::Base.mock_connection2 = mock_conn
+
+        begin
+          # Run generator
+          @generator.analyze_and_modify_models
+        ensure
+          class << ActiveRecord::Base
+            remove_method :connection
+            alias_method :connection, :original_connection2
+            remove_method :original_connection2
+            remove_method :mock_connection2
+            remove_method :mock_connection2=
+          end
+        end
+
+        # Verify file was modified
+        content = File.read(File.join(@temp_dir, "app/models/coverage_user.rb"))
+        assert_match(/use_integer_primary_key/, content)
       end
     end
   end
