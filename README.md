@@ -101,6 +101,19 @@ When installing Action Text or Active Storage, migrations automatically integrat
 
 Polymorphic associations work seamlessly with UUID primary keys. Foreign key types are automatically detected.
 
+### Bulk Operations
+
+When using bulk insert operations (`Model.import`, `insert_all`, `upsert_all`), UUIDs are NOT automatically generated as callbacks are skipped:
+
+```ruby
+# This will NOT generate UUIDs:
+User.insert_all([{name: "Alice"}, {name: "Bob"}])
+
+# Manual UUID assignment required:
+users = [{name: "Alice", id: SecureRandom.uuid_v7}, {name: "Bob", id: SecureRandom.uuid_v7}]
+User.insert_all(users)
+```
+
 ## Performance & Architecture
 
 UUIDv7 provides excellent performance with monotonic ordering and reduced index fragmentation compared to UUIDv4.

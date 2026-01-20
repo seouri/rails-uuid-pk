@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
   - **ARCHITECTURE.md**: Updated "Zero-Configuration Philosophy" to highlight automatic UUIDv7 primary keys by default
   - **DEVELOPMENT.md**: Clarified opt-out functionality as "exceptions only" for specific use cases
   - **AGENTS.md**: Updated project overview to state "automatically assumes UUIDv7 primary keys by default... Models requiring integer primary keys are treated as exceptions"
+- **Bulk Operations Documentation**: Added comprehensive documentation about bulk operations performance and limitations across README.md and PERFORMANCE.md, explaining that UUIDs are not automatically generated during bulk insert operations (`insert_all`, `upsert_all`, `Model.import`) and require manual UUID assignment using `SecureRandom.uuid_v7`, while highlighting the significant performance benefits when properly implemented
 
 ### Technical Details
 - Added `lib/generators/rails_uuid_pk/add_opt_outs_generator.rb` with full Rails generator implementation

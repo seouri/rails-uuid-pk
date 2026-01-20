@@ -12,6 +12,30 @@ This document provides detailed performance analysis and optimization guidance f
 
 **Memory Efficient**: Minimal memory overhead for bulk operations
 
+### Bulk Operations Performance
+
+**Important Limitation**: Bulk insert operations (`Model.import`, `insert_all`, `upsert_all`) bypass ActiveRecord callbacks, so UUIDs are NOT automatically generated. Manual UUID assignment is required for data integrity:
+
+```ruby
+# ❌ This will NOT generate UUIDs (callbacks bypassed)
+User.insert_all([{name: "Alice"}, {name: "Bob"}])
+
+# ✅ Manual UUID assignment required
+users = [{name: "Alice", id: SecureRandom.uuid_v7}, {name: "Bob", id: SecureRandom.uuid_v7}]
+User.insert_all(users)
+```
+
+**Performance Benefits**: When UUIDs are properly assigned, bulk operations provide significant performance advantages:
+- **Reduced Callback Overhead**: Skip validation and callback execution for each record
+- **Batch Processing**: Database handles multiple inserts in a single operation
+- **Connection Efficiency**: Fewer round-trips between application and database
+- **Memory Optimization**: Process large datasets without individual object instantiation
+
+**Throughput Comparison**:
+- **Individual Inserts**: ~1,000-5,000 records/second (with callbacks)
+- **Bulk Inserts**: ~10,000-50,000 records/second (UUIDs pre-assigned)
+- **Performance Gain**: 10-20x faster for large datasets
+
 ### Benchmark Results
 
 ```ruby
