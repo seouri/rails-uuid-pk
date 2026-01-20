@@ -14,11 +14,22 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
   spec.metadata["documentation_uri"] = "https://www.rubydoc.info/gems/#{spec.name}/#{spec.version}"
+  spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.required_ruby_version = ">= 3.3.0"
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md", "CHANGELOG.md"]
+    Dir[
+      "{app,config,db,lib}/**/*",
+      "ARCHITECTURE.md",
+      "CHANGELOG.md",
+      "DEVELOPMENT.md",
+      "MIT-LICENSE",
+      "PERFORMANCE.md",
+      "Rakefile",
+      "README.md",
+      "SECURITY.md"
+    ]
   end
 
   spec.add_dependency "rails", "~> 8.0"
