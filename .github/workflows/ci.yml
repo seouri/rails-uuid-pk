@@ -63,7 +63,7 @@ jobs:
     strategy:
       matrix:
         ruby-version: ['3.3', '3.4', '4.0']
-        db: [sqlite3, postgresql, mysql]
+        db: [sqlite3, postgresql, mysql, trilogy]
     services:
       postgres:
         image: postgres:18
@@ -84,7 +84,7 @@ jobs:
         options: --health-cmd "mysqladmin ping -h localhost" --health-interval 10s --health-timeout 5s --health-retries 5
     env:
       DB_HOST: localhost
-      RAILS_ENV: ${{ matrix.db == 'postgresql' && 'test_postgresql' || matrix.db == 'mysql' && 'test_mysql' || 'test' }}
+      RAILS_ENV: ${{ matrix.db == 'postgresql' && 'test_postgresql' || matrix.db == 'mysql' && 'test_mysql' || matrix.db == 'trilogy' && 'test_trilogy' || 'test' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

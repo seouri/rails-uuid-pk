@@ -33,13 +33,14 @@ module RailsUuidPk
       end
     end
 
-    # Configures type mappings for SQLite and MySQL adapters.
+    # Configures type mappings for SQLite, MySQL, and Trilogy adapters.
     #
     # Registers the custom UUID type for adapters that don't have native UUID support.
+    # Supports both mysql2 and trilogy adapters for MySQL.
     initializer "rails-uuid-pk.configure_type_map", after: "active_record.initialize_database" do
       ActiveSupport.on_load(:active_record) do
         adapter_name = ActiveRecord::Base.connection.adapter_name
-        if %w[SQLite MySQL].include?(adapter_name)
+        if %w[SQLite MySQL Trilogy].include?(adapter_name)
           RailsUuidPk::Railtie.register_uuid_type(adapter_name.downcase.to_sym)
         end
       end
@@ -56,6 +57,10 @@ module RailsUuidPk
 
       ActiveSupport.on_load(:active_record_mysql2adapter) do
         prepend RailsUuidPk::Mysql2AdapterExtension
+      end
+
+      ActiveSupport.on_load(:active_record_trilogyadapter) do
+        prepend RailsUuidPk::TrilogyAdapterExtension
       end
     end
 

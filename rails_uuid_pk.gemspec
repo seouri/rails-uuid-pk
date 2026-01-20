@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.email       = [ "seouri@gmail.com" ]
   spec.homepage    = "https://github.com/seouri/rails-uuid-pk"
   spec.summary     = "Dead-simple UUID v7 primary keys for Rails apps"
-  spec.description = "Automatically use UUID v7 for all primary keys in Rails applications. Works with PostgreSQL, MySQL, and SQLite, zero configuration required."
+  spec.description = "Automatically use UUID v7 for all primary keys in Rails applications. Works with PostgreSQL, MySQL (mysql2 & trilogy), and SQLite, zero configuration required."
   spec.license     = "MIT"
 
   spec.metadata["homepage_uri"] = spec.homepage
@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rails", "~> 8.0"
   spec.add_development_dependency "mysql2", "~> 0.5.7"
+  spec.add_development_dependency "trilogy", "~> 2.10"
   spec.add_development_dependency "pg", "~> 1.6.3"
   spec.add_development_dependency "sqlite3", "~> 2.9.0"
   spec.add_development_dependency "yard", "~> 0.9"

@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
 module RailsUuidPk
-  # MySQL adapter extension for UUID type support.
+  # Trilogy adapter extension for UUID type support.
   #
-  # This module extends ActiveRecord's MySQL2 adapter to provide native UUID
+  # This module extends ActiveRecord's Trilogy adapter to provide native UUID
   # type support. It includes the shared UUID adapter extension functionality
-  # and provides MySQL-specific connection configuration.
+  # and provides Trilogy-specific connection configuration.
+  #
+  # Trilogy is GitHub's high-performance MySQL adapter that offers significant
+  # performance improvements over the standard mysql2 adapter, particularly for
+  # high-traffic Rails applications.
   #
   # @example UUID primary key and foreign key references
   #   # Primary key uses UUID type
@@ -21,9 +25,9 @@ module RailsUuidPk
   #
   # @see RailsUuidPk::UuidAdapterExtension
   # @see RailsUuidPk::Type::Uuid
-  # @see https://dev.mysql.com/doc/refman/8.0/en/data-types.html
-  module Mysql2AdapterExtension
-    include UuidAdapterExtension
+  # @see https://github.com/trilogy-libraries/trilogy
+  module TrilogyAdapterExtension
+    include RailsUuidPk::UuidAdapterExtension
 
     # Configures the database connection with UUID type support.
     #

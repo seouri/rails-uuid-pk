@@ -38,6 +38,9 @@ if ENV['DB'].nil?
 
   puts "Running tests with MySQL..."
   system({"RAILS_ENV" => "test_mysql", "DB" => "mysql"}, "ruby", __FILE__, *ARGV)
+
+  puts "Running tests with Trilogy..."
+  system({"RAILS_ENV" => "test_trilogy", "DB" => "trilogy"}, "ruby", __FILE__, *ARGV)
 else
   # Set RAILS_ENV based on DB if not already set
   case ENV['DB']
@@ -47,6 +50,8 @@ else
     ENV['RAILS_ENV'] ||= 'test_postgresql'
   when 'mysql'
     ENV['RAILS_ENV'] ||= 'test_mysql'
+  when 'trilogy'
+    ENV['RAILS_ENV'] ||= 'test_trilogy'
   end
 
   require "rails/plugin/test"

@@ -86,6 +86,7 @@ rails-uuid-pk/
 │   │   ├── mysql2_adapter_extension.rb  # MySQL adapter UUID support
 │   │   ├── railtie.rb            # Rails integration
 │   │   ├── sqlite3_adapter_extension.rb # SQLite adapter UUID support
+│   │   ├── trilogy_adapter_extension.rb # Trilogy adapter UUID support
 │   │   ├── type.rb               # Custom UUID ActiveRecord type
 │   │   ├── uuid_adapter_extension.rb    # Shared UUID adapter functionality
 │   │   └── version.rb            # Version info
@@ -153,9 +154,10 @@ rails-uuid-pk/
 4. **Adapter Extensions**:
    - **Shared UUID Adapter Extension (`lib/rails_uuid_pk/uuid_adapter_extension.rb`)**: Common UUID functionality for database adapters
      - Provides `native_database_types`, `valid_type?`, `register_uuid_types`, `initialize_type_map`, `configure_connection`, and `type_to_dump` methods
-     - Shared by MySQL and SQLite adapters to eliminate code duplication
+     - Shared by MySQL, SQLite, and Trilogy adapters to eliminate code duplication
    - **MySQL (`lib/rails_uuid_pk/mysql2_adapter_extension.rb`)**: Extends MySQL2 adapter for UUID support using VARCHAR(36)
    - **SQLite (`lib/rails_uuid_pk/sqlite3_adapter_extension.rb`)**: Extends SQLite3 adapter for UUID support using VARCHAR(36)
+   - **Trilogy (`lib/rails_uuid_pk/trilogy_adapter_extension.rb`)**: Extends Trilogy adapter for UUID support using VARCHAR(36)
    - Register custom UUID type handlers in database adapters
    - Configure type mappings for UUID columns
 
@@ -189,18 +191,19 @@ rails-uuid-pk/
   - `test/migration_helpers/`: Migration helper functionality tests
   - `test/uuid/`: UUID generation and type tests
 - **Integration tests**: Full Rails app testing via dummy app
-- **Database coverage**: Tests run against SQLite, PostgreSQL, and MySQL
+- **Database coverage**: Tests run against SQLite, PostgreSQL, MySQL (mysql2 & trilogy), and Trilogy
 - **CI coverage**: GitHub Actions runs all tests on multiple Ruby versions
 
 ### Running Tests
 ```bash
-# All tests (SQLite + PostgreSQL + MySQL)
+# All tests (SQLite + PostgreSQL + MySQL + Trilogy)
 ./bin/test
 
 # Specific database
 DB=sqlite ./bin/test
 DB=postgres ./bin/test
 DB=mysql ./bin/test
+DB=trilogy ./bin/test
 
 # Specific test file
 ./bin/test test/uuid/generation_test.rb
@@ -311,11 +314,12 @@ end
 yard doc lib/
 
 # Expected output should show:
-# Files:           8
-# Modules:         7 (    0 undocumented)
-# Classes:         2 (    0 undocumented)
+# Files:          11
+# Modules:        11 (    0 undocumented)
+# Classes:         3 (    0 undocumented)
 # Constants:       2 (    0 undocumented)
-# Methods:        19 (    0 undocumented)
+# Attributes:      0 (    0 undocumented)
+# Methods:        30 (    0 undocumented)
 # 100.00% documented
 ```
 

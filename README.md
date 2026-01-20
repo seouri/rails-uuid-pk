@@ -2,7 +2,7 @@
 
 **Dead-simple UUIDv7 primary keys for modern Rails apps**
 
-Automatically use UUID v7 for **all primary keys** in Rails applications. Works with PostgreSQL, MySQL, and SQLite — **zero configuration required**. Just add the gem and you're done!
+Automatically use UUID v7 for **all primary keys** in Rails applications. Works with PostgreSQL, MySQL (mysql2 & trilogy), and SQLite — **zero configuration required**. Just add the gem and you're done!
 
 [![Gem Version](https://img.shields.io/gem/v/rails-uuid-pk.svg?style=flat-square)](https://rubygems.org/gems/rails-uuid-pk)
 [![Ruby](https://img.shields.io/badge/ruby-≥3.3-red.svg?style=flat-square)](https://www.ruby-lang.org)

@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
   - Command-line options: `--dry-run` (preview changes), `--verbose` (detailed output)
   - Idempotent operation - safe to run multiple times
   - Comprehensive error handling and user feedback
+- **Trilogy Adapter Support**: Added support for the trilogy gem as an alternative to mysql2 for MySQL connections
+  - New `TrilogyAdapterExtension` module for trilogy adapter integration
+  - Automatic detection and registration of trilogy adapter for UUID type support
+  - Comprehensive test suite for trilogy adapter functionality
+  - Updated documentation to reflect trilogy compatibility alongside mysql2
+  - Added trilogy as development dependency for testing
 
 ### Changed
 - **Documentation Consistency**: Ensured all documentation files consistently communicate that UUIDv7 is the default behavior, while opt-out functionality exists for exceptional cases (legacy tables, third-party integrations, etc.)
@@ -36,6 +42,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 - Generator includes smart model file parsing, database schema inspection, and safe file modification
 - Full cross-database compatibility (PostgreSQL, MySQL, SQLite)
 - Production-ready with proper error handling and logging integration
+- Added `lib/rails_uuid_pk/trilogy_adapter_extension.rb` with trilogy-specific adapter extension
+- Updated `lib/rails_uuid_pk/railtie.rb` to include trilogy adapter hooks and type registration
+- Updated `lib/rails_uuid_pk.rb` to load trilogy adapter extension
+- Added `test/database_adapters/trilogy_test.rb` with comprehensive trilogy adapter tests
+- Added trilogy database configuration to test suite
+- Updated gemspec with trilogy development dependency
+- Enhanced README.md and gemspec descriptions to mention trilogy support
 
 ### Fixed
 - **Migration Helpers Robustness**: Enhanced primary key detection with improved error handling and safety checks
