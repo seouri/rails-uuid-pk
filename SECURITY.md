@@ -6,9 +6,9 @@ We take security seriously and actively maintain this gem. The following version
 
 | Version | Supported          | Security Support Until |
 | ------- | ------------------ | ---------------------- |
-| 0.13.x  | :white_check_mark: | Ongoing                |
+| 0.14.x  | :white_check_mark: | Ongoing                |
+| 0.13.x  | :white_check_mark: | 6 months from 0.14.0  |
 | 0.12.x  | :white_check_mark: | 6 months from 0.13.0  |
-| 0.11.x  | :white_check_mark: | 6 months from 0.12.0  |
 | < 0.11  | :x:                | None                   |
 
 ## Reporting a Vulnerability

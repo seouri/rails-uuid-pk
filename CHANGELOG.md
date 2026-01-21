@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
 
+## [0.14.0] - 2026-01-21
+
+### Added
+- **YARD Configuration (.yardopts)**: Added YARD configuration file to include documentation files (ARCHITECTURE.md, DEVELOPMENT.md, PERFORMANCE.md, SECURITY.md) in generated API documentation
+
+### Changed
+
 ## [0.13.0] - 2026-01-20
 
 ### Added

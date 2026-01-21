@@ -23,7 +23,7 @@ Automatically use UUID v7 for **all primary keys** in Rails applications. Works 
 Add to your `Gemfile`:
 
 ```ruby
-gem "rails-uuid-pk", "~> 0.13"
+gem "rails-uuid-pk", "~> 0.14"
 ```
 
 Then run:
