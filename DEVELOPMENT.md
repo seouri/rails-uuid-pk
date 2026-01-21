@@ -14,16 +14,25 @@ This project includes a devcontainer configuration for VS Code (highly recommend
 
 ### Devcontainer CLI
 
-For terminal-based development or automation, you can use the Devcontainer CLI. The devcontainer will be built and started automatically when you run the exec commands.
+For terminal-based development or automation, you can use the Devcontainer CLI.
 
 #### Installation
 
 - **MacOS**: `brew install devcontainer`
 - **Other systems**: `npm install -g @devcontainers/cli`
 
+#### Setup
+
+First, create and run the devcontainer:
+
+```bash
+# Create and run the devcontainer
+devcontainer up --workspace-folder .
+```
+
 #### Usage
 
-Run commands inside the devcontainer:
+Once the devcontainer is running, execute commands inside it:
 
 ```bash
 # Install dependencies
@@ -37,6 +46,15 @@ devcontainer exec --workspace-folder . ./bin/rubocop
 
 # Interactive shell
 devcontainer exec --workspace-folder . bash
+```
+
+#### Cleanup
+
+Stop the devcontainer when finished (optional, using Docker):
+
+```bash
+# Stop all rails-uuid-pk containers
+docker stop $(docker ps --filter "name=rails-uuid-pk" --format "{{.Names}}")
 ```
 
 

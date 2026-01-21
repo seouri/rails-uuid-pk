@@ -42,9 +42,15 @@ For AI coding agents that operate via command-line interfaces (such as Gemini CL
    npm install -g @devcontainers/cli
    ```
 
-2. **Access the devcontainer** for command execution (run from project root):
+2. **Create and run the devcontainer** (run from project root):
    ```bash
-   # Execute commands inside the running devcontainer
+   # Create and run the devcontainer
+   devcontainer up --workspace-folder .
+   ```
+
+3. **Execute commands inside the running devcontainer**:
+   ```bash
+   # Install dependencies
    devcontainer exec --workspace-folder . bundle install
 
    # Run tests
@@ -55,6 +61,12 @@ For AI coding agents that operate via command-line interfaces (such as Gemini CL
 
    # Interactive shell access
    devcontainer exec --workspace-folder . bash
+   ```
+
+4. **Stop the devcontainer when finished** (optional, using Docker):
+   ```bash
+   # Stop all rails-uuid-pk containers
+   docker stop $(docker ps --filter "name=rails-uuid-pk" --format "{{.Names}}")
    ```
 
 #### Alternative Access Methods

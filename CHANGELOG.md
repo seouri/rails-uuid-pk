@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0
 
 ### Changed
 
+### Documentation
+- **Devcontainer CLI Documentation Fix**: Corrected invalid devcontainer CLI commands in DEVELOPMENT.md and AGENTS.md
+
 ## [0.13.0] - 2026-01-20
 
 ### Added
