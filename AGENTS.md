@@ -70,14 +70,19 @@ For AI coding agents that operate via command-line interfaces (such as Gemini CL
    ```
 
 #### Alternative Access Methods
-If Devcontainer CLI is not available, you can also access via Docker directly:
+If Devcontainer CLI is not available, you can access the running rails-uuid-pk containers directly using Docker:
 
 ```bash
-# Find the devcontainer
-docker ps | grep devcontainer
+# Find the rails-uuid-pk containers
+docker ps --filter "name=rails-uuid-pk"
 
 # Execute commands in the container
+docker exec -it <container-id> bundle install
 docker exec -it <container-id> ./bin/test
+docker exec -it <container-id> ./bin/rubocop
+
+# Interactive shell access
+docker exec -it <container-id> bash
 ```
 
 #### Best Practices for Terminal Agents
